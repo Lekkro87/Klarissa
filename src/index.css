@@ -1,0 +1,508 @@
+@import 'tailwindcss';
+
+/*
+ * Design-Tokens
+ * Alle Farben laufen über CSS-Variablen. Das helle Schema steht auf :root,
+ * das dunkle greift bei data-theme="dark" oder – im Modus „System“ –
+ * über prefers-color-scheme. Komponenten verwenden ausschließlich Tokens.
+ */
+:root {
+  color-scheme: light;
+
+  --canvas: #f4f5f8;
+  --surface: #ffffff;
+  --surface-2: #f7f8fa;
+  --surface-3: #eceef3;
+  --line: #e4e7ee;
+  --line-strong: #cfd4de;
+
+  --ink: #161a23;
+  --ink-2: #394051;
+  --muted: #5d6475;
+
+  --primary: #3056d3;
+  --primary-hover: #2446b6;
+  --primary-fg: #ffffff;
+  --primary-text: #2b4fc7;
+  --primary-soft: #eaeffd;
+  --focus: #3056d3;
+
+  --income: #1baf7a;
+  --income-ink: #0b7650;
+  --income-soft: #e6f6ef;
+  --expense: #e34948;
+  --expense-ink: #bf3337;
+  --expense-soft: #fdecec;
+
+  --warn: #eda100;
+  --warn-ink: #875600;
+  --warn-soft: #fdf4dd;
+  --serious: #ec835a;
+  --serious-ink: #a8491f;
+  --serious-soft: #fdeee6;
+  --danger: #d03b3b;
+  --danger-ink: #b42f2f;
+  --danger-soft: #fcebeb;
+
+  --grid: #eceef2;
+  --axis: #7b8294;
+
+  --chart-1: #2a78d6;
+  --chart-2: #eb6834;
+  --chart-3: #1baf7a;
+  --chart-4: #eda100;
+  --chart-5: #e87ba4;
+  --chart-6: #008300;
+  --chart-7: #4a3aa7;
+  --chart-other: #a4a9b6;
+
+  --goal-blue: #2a78d6;
+  --goal-green: #1baf7a;
+  --goal-orange: #eb6834;
+  --goal-violet: #6a5acd;
+  --goal-magenta: #d55181;
+  --goal-yellow: #d99400;
+
+  --shadow-card: 0 1px 2px rgb(16 24 40 / 0.04), 0 1px 3px rgb(16 24 40 / 0.05);
+  --shadow-hover: 0 2px 4px rgb(16 24 40 / 0.05), 0 8px 20px -6px rgb(16 24 40 / 0.12);
+  --shadow-pop: 0 18px 40px -12px rgb(16 24 40 / 0.28), 0 4px 10px -4px rgb(16 24 40 / 0.1);
+  --backdrop: rgb(13 16 23 / 0.45);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    color-scheme: dark;
+
+    --canvas: #0d1017;
+    --surface: #151a23;
+    --surface-2: #1a202b;
+    --surface-3: #232a37;
+    --line: #262d3a;
+    --line-strong: #37404f;
+
+    --ink: #eef1f6;
+    --ink-2: #c9ced8;
+    --muted: #9aa2b2;
+
+    --primary: #4a68ec;
+    --primary-hover: #5d7af2;
+    --primary-fg: #ffffff;
+    --primary-text: #93a8ff;
+    --primary-soft: #1d2748;
+    --focus: #8ea4ff;
+
+    --income: #199e70;
+    --income-ink: #4fd39c;
+    --income-soft: #12291f;
+    --expense: #e66767;
+    --expense-ink: #ff8f86;
+    --expense-soft: #321a1c;
+
+    --warn: #c98500;
+    --warn-ink: #f2c04e;
+    --warn-soft: #2f2511;
+    --serious: #d95926;
+    --serious-ink: #f5a27e;
+    --serious-soft: #331f16;
+    --danger: #e05252;
+    --danger-ink: #ff8f86;
+    --danger-soft: #341b1d;
+
+    --grid: #222936;
+    --axis: #8a92a3;
+
+    --chart-1: #3987e5;
+    --chart-2: #d95926;
+    --chart-3: #199e70;
+    --chart-4: #c98500;
+    --chart-5: #d55181;
+    --chart-6: #008300;
+    --chart-7: #9085e9;
+    --chart-other: #5f6778;
+
+    --goal-blue: #3987e5;
+    --goal-green: #199e70;
+    --goal-orange: #d95926;
+    --goal-violet: #9085e9;
+    --goal-magenta: #d55181;
+    --goal-yellow: #c98500;
+
+    --shadow-card: 0 1px 2px rgb(0 0 0 / 0.3);
+    --shadow-hover: 0 2px 4px rgb(0 0 0 / 0.3), 0 10px 24px -8px rgb(0 0 0 / 0.5);
+    --shadow-pop: 0 20px 44px -12px rgb(0 0 0 / 0.65), 0 4px 12px -4px rgb(0 0 0 / 0.4);
+    --backdrop: rgb(3 5 9 / 0.65);
+  }
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+
+  --canvas: #0d1017;
+  --surface: #151a23;
+  --surface-2: #1a202b;
+  --surface-3: #232a37;
+  --line: #262d3a;
+  --line-strong: #37404f;
+
+  --ink: #eef1f6;
+  --ink-2: #c9ced8;
+  --muted: #9aa2b2;
+
+  --primary: #4a68ec;
+  --primary-hover: #5d7af2;
+  --primary-fg: #ffffff;
+  --primary-text: #93a8ff;
+  --primary-soft: #1d2748;
+  --focus: #8ea4ff;
+
+  --income: #199e70;
+  --income-ink: #4fd39c;
+  --income-soft: #12291f;
+  --expense: #e66767;
+  --expense-ink: #ff8f86;
+  --expense-soft: #321a1c;
+
+  --warn: #c98500;
+  --warn-ink: #f2c04e;
+  --warn-soft: #2f2511;
+  --serious: #d95926;
+  --serious-ink: #f5a27e;
+  --serious-soft: #331f16;
+  --danger: #e05252;
+  --danger-ink: #ff8f86;
+  --danger-soft: #341b1d;
+
+  --grid: #222936;
+  --axis: #8a92a3;
+
+  --chart-1: #3987e5;
+  --chart-2: #d95926;
+  --chart-3: #199e70;
+  --chart-4: #c98500;
+  --chart-5: #d55181;
+  --chart-6: #008300;
+  --chart-7: #9085e9;
+  --chart-other: #5f6778;
+
+  --goal-blue: #3987e5;
+  --goal-green: #199e70;
+  --goal-orange: #d95926;
+  --goal-violet: #9085e9;
+  --goal-magenta: #d55181;
+  --goal-yellow: #c98500;
+
+  --shadow-card: 0 1px 2px rgb(0 0 0 / 0.3);
+  --shadow-hover: 0 2px 4px rgb(0 0 0 / 0.3), 0 10px 24px -8px rgb(0 0 0 / 0.5);
+  --shadow-pop: 0 20px 44px -12px rgb(0 0 0 / 0.65), 0 4px 12px -4px rgb(0 0 0 / 0.4);
+  --backdrop: rgb(3 5 9 / 0.65);
+}
+
+@theme inline {
+  --color-canvas: var(--canvas);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-surface-3: var(--surface-3);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-muted: var(--muted);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-fg: var(--primary-fg);
+  --color-primary-text: var(--primary-text);
+  --color-primary-soft: var(--primary-soft);
+  --color-income: var(--income);
+  --color-income-ink: var(--income-ink);
+  --color-income-soft: var(--income-soft);
+  --color-expense: var(--expense);
+  --color-expense-ink: var(--expense-ink);
+  --color-expense-soft: var(--expense-soft);
+  --color-warn: var(--warn);
+  --color-warn-ink: var(--warn-ink);
+  --color-warn-soft: var(--warn-soft);
+  --color-serious: var(--serious);
+  --color-serious-ink: var(--serious-ink);
+  --color-serious-soft: var(--serious-soft);
+  --color-danger: var(--danger);
+  --color-danger-ink: var(--danger-ink);
+  --color-danger-soft: var(--danger-soft);
+
+  --font-sans: 'Figtree', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-display: 'Sora', 'Figtree', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  --shadow-card: var(--shadow-card);
+  --shadow-hover: var(--shadow-hover);
+  --shadow-pop: var(--shadow-pop);
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    margin: 0;
+    background: var(--canvas);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    font-size: 15px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+  }
+
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+  }
+
+  ::selection {
+    background: color-mix(in srgb, var(--primary) 22%, transparent);
+  }
+
+  button:not(:disabled),
+  [role='button']:not([aria-disabled='true']),
+  select,
+  label[for] {
+    cursor: pointer;
+  }
+
+  input[type='date']::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+    opacity: 0.7;
+  }
+
+  :root[data-theme='dark'] input[type='date']::-webkit-calendar-picker-indicator {
+    filter: invert(0.85);
+  }
+}
+
+@layer components {
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    box-shadow: var(--shadow-card);
+  }
+
+  .num {
+    font-variant-numeric: tabular-nums;
+  }
+
+  .skip-link {
+    position: absolute;
+    left: 16px;
+    top: -60px;
+    z-index: 100;
+    padding: 10px 16px;
+    border-radius: 10px;
+    background: var(--primary);
+    color: var(--primary-fg);
+    font-weight: 600;
+    transition: top 0.15s ease;
+  }
+
+  .skip-link:focus {
+    top: 12px;
+  }
+
+  .control {
+    width: 100%;
+    min-height: 44px;
+    border-radius: 12px;
+    border: 1px solid var(--line-strong);
+    background: var(--surface);
+    color: var(--ink);
+    padding: 0 14px;
+    font-size: 15px;
+    transition:
+      border-color 0.15s ease,
+      box-shadow 0.15s ease;
+  }
+
+  .control::placeholder {
+    color: color-mix(in srgb, var(--muted) 80%, transparent);
+  }
+
+  .control:hover {
+    border-color: color-mix(in srgb, var(--primary) 45%, var(--line-strong));
+  }
+
+  .control:focus,
+  .control:focus-visible {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 22%, transparent);
+  }
+
+  .control:focus-within {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 22%, transparent);
+  }
+
+  .control[aria-invalid='true'],
+  .control:has([aria-invalid='true']) {
+    border-color: var(--danger);
+  }
+
+  .control[aria-invalid='true']:focus {
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--danger) 22%, transparent);
+  }
+
+  select.control {
+    appearance: none;
+    padding-right: 38px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%238a92a3' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+  }
+
+  textarea.control {
+    padding: 12px 14px;
+    min-height: 140px;
+    line-height: 1.45;
+  }
+}
+
+/* Dezente Animationen */
+@keyframes page-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes pop-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes sheet-in {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: none;
+  }
+}
+
+@keyframes drawer-in {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: none;
+  }
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes grow-x {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes pop-dot {
+  0% {
+    transform: scale(0.6);
+  }
+  60% {
+    transform: scale(1.15);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@utility animate-page {
+  animation: page-in 0.28s ease-out both;
+}
+
+@utility animate-fade {
+  animation: fade-in 0.18s ease-out both;
+}
+
+@utility animate-pop {
+  animation: pop-in 0.22s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+@utility animate-sheet {
+  animation: sheet-in 0.26s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+@utility animate-drawer {
+  animation: drawer-in 0.24s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+@utility animate-toast {
+  animation: toast-in 0.24s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+@utility animate-grow {
+  transform-origin: left center;
+  animation: grow-x 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+@utility animate-badge {
+  animation: pop-dot 0.3s ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Recharts: Fokusrahmen im SVG ausblenden, Tastatur-Fokus liegt auf der Legende */
+.recharts-wrapper svg:focus,
+.recharts-surface:focus,
+.recharts-sector:focus,
+.recharts-rectangle:focus {
+  outline: none;
+}
