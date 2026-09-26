@@ -5,16 +5,17 @@ type Variant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'soft';
 type Size = 'sm' | 'md';
 
 const VARIANTS: Record<Variant, string> = {
-  primary: 'bg-primary text-primary-fg shadow-sm hover:bg-primary-hover active:translate-y-px',
-  secondary: 'border border-line-strong bg-surface text-ink hover:bg-surface-2 hover:border-line-strong active:translate-y-px',
+  primary: 'btn-primary',
+  secondary:
+    'border border-line bg-surface text-ink shadow-[0_1px_2px_rgb(18_19_26/0.05)] hover:border-line-strong hover:bg-surface-2 active:translate-y-px',
   ghost: 'text-ink-2 hover:bg-surface-3 hover:text-ink',
   danger: 'bg-danger text-white shadow-sm hover:brightness-110 active:translate-y-px',
   soft: 'bg-primary-soft text-primary-text hover:bg-[color-mix(in_srgb,var(--primary)_18%,var(--surface))]',
 };
 
 const SIZES: Record<Size, string> = {
-  sm: 'h-9 gap-1.5 rounded-[10px] px-3 text-sm',
-  md: 'h-11 gap-2 rounded-xl px-4 text-[15px]',
+  sm: 'h-9 gap-1.5 rounded-[11px] px-3 text-sm',
+  md: 'h-11 gap-2 rounded-[14px] px-4.5 text-[15px]',
 };
 
 export interface ButtonProps extends ComponentPropsWithRef<'button'> {
@@ -56,6 +57,8 @@ export interface IconButtonProps extends ComponentPropsWithRef<'button'> {
   label: string;
   tone?: 'default' | 'danger' | 'primary';
   size?: 'sm' | 'md';
+  /** `outline`: runder Button mit Rahmen (z. B. im Header) */
+  variant?: 'ghost' | 'outline';
 }
 
 const ICON_TONES = {
@@ -69,6 +72,7 @@ export function IconButton({
   label,
   tone = 'default',
   size = 'md',
+  variant = 'ghost',
   className = '',
   type = 'button',
   ...rest
@@ -78,7 +82,9 @@ export function IconButton({
       type={type}
       aria-label={label}
       title={label}
-      className={`relative inline-grid shrink-0 place-items-center rounded-xl transition-colors duration-150 disabled:opacity-40 ${size === 'sm' ? 'size-9' : 'size-10'} ${ICON_TONES[tone]} ${className}`}
+      className={`relative inline-grid shrink-0 place-items-center transition-colors duration-150 disabled:opacity-40 ${size === 'sm' ? 'size-9' : 'size-10'} ${
+        variant === 'outline' ? 'rounded-full border border-line bg-surface shadow-[0_1px_2px_rgb(18_19_26/0.05)]' : 'rounded-xl'
+      } ${ICON_TONES[tone]} ${className}`}
       {...rest}
     >
       <Icon className={size === 'sm' ? 'size-[17px]' : 'size-5'} aria-hidden="true" />

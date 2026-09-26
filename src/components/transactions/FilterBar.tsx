@@ -100,7 +100,7 @@ export function FilterBar({ filters, onChange }: FilterBarProps) {
 
       <div
         id={`${id}-panel`}
-        className={`${expanded ? 'grid' : 'hidden'} mt-4 gap-4 md:grid md:grid-cols-2 xl:grid-cols-[1fr_1.35fr_1fr_1fr]`}
+        className={`${expanded ? 'grid' : 'hidden'} mt-4 gap-4 md:grid md:grid-cols-2 xl:grid-cols-[1fr_1.55fr_1fr_1fr]`}
       >
         <div className="flex min-w-0 flex-col gap-1.5">
           <label htmlFor={`${id}-period`} className="text-[13px] font-semibold text-muted">

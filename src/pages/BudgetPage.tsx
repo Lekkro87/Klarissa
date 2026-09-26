@@ -7,7 +7,8 @@ import { Button, IconButton } from '../components/ui/Button';
 import { Card, CardHeader, PageIntro } from '../components/ui/Card';
 import { useConfirm } from '../components/ui/ConfirmDialog';
 import { EmptyState } from '../components/ui/EmptyState';
-import { LEVEL_COLORS, ProgressBar } from '../components/ui/ProgressBar';
+import { LEVEL_COLORS } from '../components/ui/ProgressBar';
+import { RingProgress } from '../components/ui/RingProgress';
 import { useToast } from '../components/ui/Toast';
 import { budgetsForMonth, collectWarnings, summarizeMonthBudgets } from '../lib/calculations';
 import { CATEGORY_ICONS } from '../lib/categories';
@@ -82,6 +83,7 @@ export function BudgetPage() {
   return (
     <div className="space-y-6">
       <PageIntro
+        title={t.nav.budget}
         subtitle={t.budget.subtitle}
         actions={
           <Button icon={Plus} onClick={() => setModal({ kind: 'category' })}>
@@ -154,46 +156,49 @@ export function BudgetPage() {
 
             {hasAnyBudget ? (
               <>
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                  <div>
-                    <p className="text-[13px] font-semibold text-muted">{t.budget.monthlyBudget}</p>
-                    <p className="num mt-1 font-display text-[26px] font-semibold tracking-[-0.03em] text-ink">
-                      {f.money(summary.amount)}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-[13px] font-semibold text-muted">{t.budget.spent}</p>
-                    <p className="num mt-1 font-display text-[26px] font-semibold tracking-[-0.03em] text-ink">
-                      {f.money(summary.spent)}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-[13px] font-semibold text-muted">
-                      {summary.remaining >= 0 ? t.budget.remaining : t.budget.exceededBy}
-                    </p>
-                    <p
-                      className={`num mt-1 font-display text-[26px] font-semibold tracking-[-0.03em] ${
-                        summary.remaining >= 0 ? 'text-income-ink' : 'text-danger-ink'
-                      }`}
-                    >
-                      {f.money(Math.abs(summary.remaining))}
-                    </p>
-                  </div>
-                </div>
-                <div className="mt-6 space-y-2">
-                  <ProgressBar
+                <div className="flex flex-col items-center gap-6 sm:flex-row sm:items-center sm:gap-8">
+                  <RingProgress
                     percent={summary.percent}
-                    size="lg"
                     color={monthColor}
                     label={t.budget.monthlyBudget}
                     valueText={`${f.percent(summary.percent, 0)} – ${t.budget.ofBudget(f.money(summary.spent), f.money(summary.amount))}`}
-                  />
-                  <div className="num flex flex-wrap items-center justify-between gap-2 text-[13px] text-muted">
-                    <span className="font-semibold text-ink-2">{f.percent(summary.percent, 0)}</span>
-                    {perDay !== null && <span>{t.budget.perDay(f.money(perDay), daysLeft)}</span>}
-                  </div>
+                  >
+                    <div>
+                      <p className="num font-display text-[30px] font-semibold leading-none tracking-[-0.04em] text-ink">
+                        {f.percent(summary.percent, 0)}
+                      </p>
+                      <p className="mt-1.5 text-xs font-medium text-muted">{t.budget.spentOf}</p>
+                    </div>
+                  </RingProgress>
+                  <dl className="grid w-full flex-1 grid-cols-1 gap-4 min-[420px]:grid-cols-3 sm:grid-cols-1 md:grid-cols-3 xl:grid-cols-1 2xl:grid-cols-3">
+                    <div className="rounded-2xl bg-surface-2 px-4 py-3">
+                      <dt className="text-[13px] font-semibold text-muted">{t.budget.monthlyBudget}</dt>
+                      <dd className="num mt-1 truncate font-display text-[22px] font-semibold tracking-[-0.03em] text-ink">
+                        {f.money(summary.amount)}
+                      </dd>
+                    </div>
+                    <div className="rounded-2xl bg-surface-2 px-4 py-3">
+                      <dt className="text-[13px] font-semibold text-muted">{t.budget.spent}</dt>
+                      <dd className="num mt-1 truncate font-display text-[22px] font-semibold tracking-[-0.03em] text-ink">
+                        {f.money(summary.spent)}
+                      </dd>
+                    </div>
+                    <div className="rounded-2xl bg-surface-2 px-4 py-3">
+                      <dt className="text-[13px] font-semibold text-muted">
+                        {summary.remaining >= 0 ? t.budget.remaining : t.budget.exceededBy}
+                      </dt>
+                      <dd
+                        className={`num mt-1 truncate font-display text-[22px] font-semibold tracking-[-0.03em] ${
+                          summary.remaining >= 0 ? 'text-income-ink' : 'text-danger-ink'
+                        }`}
+                      >
+                        {f.money(Math.abs(summary.remaining))}
+                      </dd>
+                    </div>
+                  </dl>
                 </div>
-                <div className="mt-5 space-y-1 border-t border-line pt-4 text-[13px] text-muted">
+                <div className="mt-6 space-y-1 border-t border-line pt-4 text-[13px] text-muted">
+                  {perDay !== null && <p className="font-semibold text-ink-2">{t.budget.perDay(f.money(perDay), daysLeft)}</p>}
                   <p>{summary.isDerived ? t.budget.derivedHint : t.budget.explicitHint}</p>
                   {summary.unbudgetedSpent > 0 && <p>{t.budget.unbudgetedShare(f.money(summary.unbudgetedSpent))}</p>}
                 </div>

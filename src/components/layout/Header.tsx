@@ -5,7 +5,7 @@ import type { BudgetWarning } from '../../lib/calculations';
 import { useData, useI18n } from '../../state/store';
 import { IconButton } from '../ui/Button';
 import { useWarningMessage } from '../budget/warningText';
-import { Avatar } from './Navigation';
+import { Avatar, LogoMark } from './Navigation';
 
 interface HeaderProps {
   route: Route;
@@ -68,7 +68,7 @@ export function Header({
       <label htmlFor={id} className="sr-only">
         {t.header.searchLabel}
       </label>
-      <Search className="pointer-events-none absolute left-3.5 top-1/2 size-[18px] -translate-y-1/2 text-muted" aria-hidden="true" />
+      <Search className="pointer-events-none absolute left-4 top-1/2 size-[18px] -translate-y-1/2 text-muted" aria-hidden="true" />
       <input
         ref={ref}
         id={id}
@@ -87,10 +87,10 @@ export function Header({
         }}
         placeholder={t.header.searchPlaceholder}
         autoComplete="off"
-        className="control h-10 min-h-10 rounded-xl border-line bg-surface-2 pl-10 pr-10 text-sm"
+        className="control h-11 min-h-11 rounded-full border-line bg-surface pl-11 pr-10 text-sm shadow-[0_1px_2px_rgb(18_19_26/0.04)]"
       />
       <kbd
-        className="pointer-events-none absolute right-3 top-1/2 hidden -translate-y-1/2 rounded-md border border-line bg-surface px-1.5 text-[11px] font-semibold text-muted xl:block"
+        className="pointer-events-none absolute right-3.5 top-1/2 hidden -translate-y-1/2 rounded-md border border-line bg-surface-2 px-1.5 text-[11px] font-semibold text-muted xl:block"
         title={t.header.searchShortcut}
       >
         /
@@ -99,22 +99,26 @@ export function Header({
   );
 
   return (
-    <header className="sticky top-[env(safe-area-inset-top,0px)] z-30 border-b border-line bg-[color-mix(in_srgb,var(--canvas)_86%,transparent)] backdrop-blur-md">
-      <div className="mx-auto flex h-16 max-w-[1440px] items-center gap-2 px-4 sm:gap-3 sm:px-6 lg:px-8">
+    <header className="sticky top-[env(safe-area-inset-top,0px)] z-30 border-b border-line/70 bg-[color-mix(in_srgb,var(--canvas)_78%,transparent)] backdrop-blur-xl">
+      <div className="mx-auto flex h-[68px] max-w-[1440px] items-center gap-2 px-4 sm:gap-3 sm:px-6 lg:px-8">
         <IconButton icon={Menu} label={t.nav.openMenu} onClick={onOpenMenu} className="-ml-2 lg:hidden" />
-        <h1
-          id="page-title"
-          tabIndex={-1}
-          className="min-w-0 flex-1 truncate font-display text-lg font-semibold tracking-[-0.02em] text-ink outline-none sm:text-xl md:flex-none"
-        >
-          {t.nav[route]}
-        </h1>
+        <div className="flex min-w-0 flex-1 items-center gap-2.5 md:hidden" aria-hidden="true">
+          <LogoMark size="sm" />
+          <span className="truncate font-display text-[17px] font-semibold tracking-[-0.03em] text-ink">{t.app.name}</span>
+        </div>
 
-        <div className="mx-auto hidden w-full max-w-md md:block">{searchField(`${searchId}-desktop`, desktopInput)}</div>
+        <div className="hidden w-full max-w-md md:block">{searchField(`${searchId}-desktop`, desktopInput)}</div>
 
-        <div className="ml-auto flex items-center gap-1 sm:gap-1.5 md:ml-0">
-          <IconButton icon={Search} label={t.header.openSearch} onClick={() => setMobileSearch(true)} className="md:hidden" />
-          <IconButton icon={isDark ? Sun : Moon} label={isDark ? t.header.toLight : t.header.toDark} onClick={onToggleTheme} />
+        <div className="ml-auto flex items-center gap-1.5 sm:gap-2">
+          <IconButton icon={Search} label={t.header.openSearch} onClick={() => setMobileSearch(true)} variant="outline" className="md:hidden" />
+          <span className="hidden sm:inline-flex">
+            <IconButton
+              icon={isDark ? Sun : Moon}
+              label={isDark ? t.header.toLight : t.header.toDark}
+              onClick={onToggleTheme}
+              variant="outline"
+            />
+          </span>
           <NotificationMenu
             warnings={warnings}
             unreadIds={unreadIds}
@@ -127,7 +131,7 @@ export function Header({
               event.preventDefault();
               onNavigate('settings');
             }}
-            className="ml-1 flex items-center gap-2.5 rounded-full p-0.5 transition-colors hover:bg-surface-3 sm:rounded-xl sm:py-1 sm:pl-1 sm:pr-3"
+            className="ml-0.5 flex items-center gap-2.5 rounded-full p-0.5 transition-colors hover:bg-surface-3 xl:border xl:border-line xl:bg-surface xl:py-0.5 xl:pl-0.5 xl:pr-4"
             aria-label={t.header.profile}
             title={t.header.profile}
           >
@@ -192,13 +196,13 @@ function NotificationMenu({ warnings, unreadIds, onMarkAllRead, onOpenBudget }: 
         aria-expanded={open}
         aria-controls={panelId}
         onClick={() => setOpen((value) => !value)}
-        className={`relative grid size-10 place-items-center rounded-xl transition-colors ${
-          open ? 'bg-surface-3 text-ink' : 'text-muted hover:bg-surface-3 hover:text-ink'
+        className={`relative grid size-10 place-items-center rounded-full border border-line shadow-[0_1px_2px_rgb(18_19_26/0.05)] transition-colors ${
+          open ? 'bg-surface-3 text-ink' : 'bg-surface text-muted hover:bg-surface-2 hover:text-ink'
         }`}
       >
         {unread > 0 ? <BellRing className="size-5" aria-hidden="true" /> : <Bell className="size-5" aria-hidden="true" />}
         {unread > 0 && (
-          <span className="animate-badge num absolute right-1 top-1 grid h-[18px] min-w-[18px] place-items-center rounded-full bg-danger px-1 text-[11px] font-bold text-white ring-2 ring-[var(--canvas)]">
+          <span className="animate-badge num absolute -right-1 -top-1 grid h-[18px] min-w-[18px] place-items-center rounded-full bg-danger px-1 text-[11px] font-bold text-white ring-2 ring-[var(--canvas)]">
             {unread}
           </span>
         )}
@@ -209,7 +213,7 @@ function NotificationMenu({ warnings, unreadIds, onMarkAllRead, onOpenBudget }: 
           id={panelId}
           role="region"
           aria-label={t.header.notifications}
-          className="animate-pop absolute right-0 top-full z-40 mt-2 w-[min(calc(100vw-32px),380px)] overflow-hidden rounded-2xl border border-line bg-surface shadow-pop"
+          className="animate-pop absolute right-0 top-full z-40 mt-3 w-[min(calc(100vw-32px),380px)] overflow-hidden rounded-[22px] border border-line bg-surface shadow-pop"
         >
           <div className="flex items-center justify-between gap-3 border-b border-line px-4 py-3">
             <p className="font-display text-[15px] font-semibold text-ink">{t.header.notifications}</p>

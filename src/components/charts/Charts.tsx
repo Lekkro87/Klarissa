@@ -40,7 +40,7 @@ interface ChartTooltipProps {
 
 export function ChartTooltipBox({ title, rows }: { title?: string; rows: NonNullable<ChartTooltipProps['rows']> }) {
   return (
-    <div className="min-w-44 rounded-xl border border-line bg-surface px-3.5 py-2.5 text-sm shadow-pop">
+    <div className="min-w-44 rounded-2xl border border-line bg-glass px-3.5 py-2.5 text-sm shadow-pop backdrop-blur-xl">
       {title && <p className="mb-1.5 font-semibold text-ink">{title}</p>}
       <ul className="space-y-1">
         {rows.map((row) => (
@@ -82,12 +82,22 @@ export function IncomeExpenseChart({ data, height = 280 }: { data: IncomeExpense
   return (
     <div role="img" aria-label={`${t.dashboard.incomeVsExpenses}. ${summary}`}>
       <ResponsiveContainer width="100%" height={height}>
-        <BarChart data={data} barGap={3} barCategoryGap="26%" margin={{ top: 8, right: 4, bottom: 0, left: 0 }}>
-          <CartesianGrid vertical={false} stroke="var(--grid)" />
+        <BarChart data={data} barGap={4} barCategoryGap="28%" margin={{ top: 8, right: 4, bottom: 0, left: 0 }}>
+          <defs>
+            <linearGradient id="bar-income" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="var(--income)" stopOpacity={1} />
+              <stop offset="100%" stopColor="var(--income)" stopOpacity={0.55} />
+            </linearGradient>
+            <linearGradient id="bar-expense" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="var(--expense)" stopOpacity={1} />
+              <stop offset="100%" stopColor="var(--expense)" stopOpacity={0.55} />
+            </linearGradient>
+          </defs>
+          <CartesianGrid vertical={false} stroke="var(--grid)" strokeDasharray="0" />
           <XAxis dataKey="label" tickLine={false} axisLine={{ stroke: 'var(--line-strong)' }} tick={axisTick} tickMargin={10} />
           <YAxis tickFormatter={f.axisMoney} tickLine={false} axisLine={false} tick={axisTick} width={72} />
           <Tooltip
-            cursor={{ fill: 'var(--surface-3)', opacity: 0.6, radius: 8 } as object}
+            cursor={{ fill: 'var(--surface-3)', opacity: 0.55, radius: 10 } as object}
             content={({ active, payload }) => {
               if (!active || !payload?.length) return null;
               const point = payload[0].payload as IncomeExpenseDatum;
@@ -103,8 +113,8 @@ export function IncomeExpenseChart({ data, height = 280 }: { data: IncomeExpense
               );
             }}
           />
-          <Bar dataKey="income" name={t.common.income} fill="var(--income)" radius={[4, 4, 0, 0]} maxBarSize={24} animationDuration={600} />
-          <Bar dataKey="expense" name={t.common.expenses} fill="var(--expense)" radius={[4, 4, 0, 0]} maxBarSize={24} animationDuration={600} />
+          <Bar dataKey="income" name={t.common.income} fill="url(#bar-income)" radius={[6, 6, 0, 0]} maxBarSize={22} animationDuration={600} />
+          <Bar dataKey="expense" name={t.common.expenses} fill="url(#bar-expense)" radius={[6, 6, 0, 0]} maxBarSize={22} animationDuration={600} />
         </BarChart>
       </ResponsiveContainer>
     </div>
@@ -145,8 +155,8 @@ export function TrendChart({ data, color, name, height = 240, emptyText, allowZe
         <AreaChart data={data} margin={{ top: 8, right: 8, bottom: 0, left: 0 }}>
           <defs>
             <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor={color} stopOpacity={0.22} />
-              <stop offset="100%" stopColor={color} stopOpacity={0.02} />
+              <stop offset="0%" stopColor={color} stopOpacity={0.28} />
+              <stop offset="100%" stopColor={color} stopOpacity={0} />
             </linearGradient>
           </defs>
           <CartesianGrid vertical={false} stroke="var(--grid)" />
@@ -173,7 +183,7 @@ export function TrendChart({ data, color, name, height = 240, emptyText, allowZe
             dataKey="value"
             name={name}
             stroke={color}
-            strokeWidth={2}
+            strokeWidth={2.5}
             fill={`url(#${gradientId})`}
             dot={false}
             activeDot={{ r: 5, strokeWidth: 2, stroke: 'var(--surface)', fill: color }}
@@ -261,13 +271,13 @@ export function CategoryDonut({ items, total, title, emptyText, compact = false 
               data={items}
               dataKey="amount"
               nameKey="label"
-              innerRadius="66%"
+              innerRadius="72%"
               outerRadius="100%"
               startAngle={90}
               endAngle={-270}
-              cornerRadius={4}
-              stroke="var(--surface)"
-              strokeWidth={2}
+              paddingAngle={items.length > 1 ? 2.5 : 0}
+              cornerRadius={6}
+              stroke="none"
               onMouseEnter={(_, index) => setActive(index)}
               onMouseLeave={() => setActive(null)}
               animationDuration={700}
@@ -286,7 +296,7 @@ export function CategoryDonut({ items, total, title, emptyText, compact = false 
         <div className="pointer-events-none absolute inset-0 grid place-items-center">
           <div className="max-w-[64%] text-center">
             <p className="truncate text-xs font-medium text-muted">{activeItem ? activeItem.label : t.common.total}</p>
-            <p className="num font-display text-[15px] font-semibold leading-tight text-ink sm:text-base">
+            <p className="num font-display text-base font-semibold leading-tight tracking-[-0.02em] text-ink sm:text-lg">
               {f.money(activeItem ? activeItem.amount : total)}
             </p>
             {activeItem && <p className="num text-xs font-semibold text-muted">{f.percent(activeItem.share)}</p>}
@@ -298,12 +308,12 @@ export function CategoryDonut({ items, total, title, emptyText, compact = false 
         {items.map((item, index) => (
           <li key={item.key}>
             <div
-              className={`flex items-center gap-3 rounded-lg px-2 py-1.5 transition-colors ${active === index ? 'bg-surface-2' : ''}`}
+              className={`flex items-center gap-3 rounded-xl px-2.5 py-2 transition-colors ${active === index ? 'bg-surface-2' : ''}`}
               onMouseEnter={() => setActive(index)}
               onMouseLeave={() => setActive(null)}
             >
-              <span className="size-2.5 shrink-0 rounded-[3px]" style={{ background: item.color }} aria-hidden="true" />
-              <span className="min-w-0 flex-1 truncate text-sm text-ink-2">{item.label}</span>
+              <span className="size-3 shrink-0 rounded-full ring-2 ring-[var(--surface)]" style={{ background: item.color, boxShadow: `0 0 0 3px color-mix(in srgb, ${item.color} 22%, transparent)` }} aria-hidden="true" />
+              <span className="min-w-0 flex-1 truncate text-sm font-medium text-ink-2">{item.label}</span>
               <span className="num text-sm font-semibold text-ink">{f.money(item.amount)}</span>
               <span className="num w-14 text-right text-[13px] text-muted">{f.percent(item.share)}</span>
             </div>

@@ -1,7 +1,20 @@
-import { ArrowRight, Landmark, Percent, PiggyBank, Plus, Receipt, TrendingDown, TrendingUp, Wallet } from 'lucide-react';
+import {
+  ArrowDownRight,
+  ArrowRight,
+  ArrowUpRight,
+  Landmark,
+  Percent,
+  PiggyBank,
+  Plus,
+  Receipt,
+  TrendingDown,
+  TrendingUp,
+  Wallet,
+} from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { BudgetRow } from '../components/budget/BudgetBits';
 import { CategoryDonut, IncomeExpenseChart, toDonutItems } from '../components/charts/Charts';
+import { Sparkline } from '../components/charts/Sparkline';
 import { StatCard } from '../components/dashboard/StatCard';
 import { GoalRow } from '../components/goals/GoalBits';
 import { Amount, CategoryBubble, useTransactionTitle } from '../components/transactions/TransactionBits';
@@ -100,6 +113,22 @@ export function DashboardPage() {
     [transactions, today, chartMonths, f],
   );
 
+  const trends = useMemo(() => {
+    const year = monthlySeries(transactions, ymOf(today), 12);
+    const recent = year.slice(-6);
+    const label = (key: string) => f.monthShort(ymOf(`${key}-01`));
+    return {
+      balance: year.map((point) => point.balance),
+      labels: year.map((point) => f.monthYear(ymOf(`${point.key}-01`))),
+      income: recent.map((point) => point.income),
+      expense: recent.map((point) => point.expense),
+      rate: recent.map((point) => savingsRate(point.income, point.expense) ?? 0),
+      shortLabels: recent.map((point) => label(point.key)),
+      axisStart: `${label(year[0].key)} ${year[0].key.slice(0, 4)}`,
+      axisEnd: `${label(year[year.length - 1].key)} ${year[year.length - 1].key.slice(0, 4)}`,
+    };
+  }, [transactions, today, f]);
+
   const monthCompare = useMemo(() => {
     const current = computeTotals(filterByRange(transactions, monthRange(ymOf(today))));
     const previous = computeTotals(filterByRange(transactions, monthRange(addMonths(ymOf(today), -1))));
@@ -146,10 +175,15 @@ export function DashboardPage() {
     <div className="space-y-6">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div className="min-w-0">
-          <p className="font-display text-2xl font-semibold tracking-[-0.02em] text-ink sm:text-[28px]">
+          <p className="eyebrow mb-2">{f.weekdayDate(today)}</p>
+          <h1
+            id="page-title"
+            tabIndex={-1}
+            className="font-display text-[28px] font-semibold leading-tight tracking-[-0.035em] text-ink outline-none sm:text-[34px]"
+          >
             {t.dashboard.greeting(firstName)}
-          </p>
-          <p className="mt-1 text-muted">{t.dashboard.subtitle}</p>
+          </h1>
+          <p className="mt-1.5 text-[15px] text-muted">{t.dashboard.subtitle}</p>
         </div>
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
           <SegmentedControl
@@ -159,7 +193,7 @@ export function DashboardPage() {
             options={periodOptions}
             mobileSelect
           />
-          {/* Auf dem Smartphone übernimmt der schwebende Plus-Button diese Aktion */}
+          {/* Auf dem Smartphone übernimmt der Plus-Button in der Tab-Leiste diese Aktion */}
           <div className="hidden sm:block">
             <Button icon={Plus} onClick={() => ui.openTransaction()}>
               {t.actions.addTransaction}
@@ -168,50 +202,115 @@ export function DashboardPage() {
         </div>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard
-          label={t.dashboard.balance}
-          value={f.money(metrics.balance)}
-          icon={Landmark}
-          tone="primary"
-          highlight
-          delta={deltaFor(metrics.balanceChange)}
-          caption={metrics.balanceChange === null ? t.dashboard.noComparison : t.dashboard.comparison.balance}
-        />
-        <StatCard
-          label={t.dashboard.income}
-          value={f.money(metrics.current.income)}
-          icon={TrendingUp}
-          tone="income"
-          delta={deltaFor(incomeChange)}
-          caption={captionFor(incomeChange)}
-        />
-        <StatCard
-          label={t.dashboard.expenses}
-          value={f.money(metrics.current.expense)}
-          icon={TrendingDown}
-          tone="expense"
-          delta={deltaFor(expenseChange, false)}
-          caption={captionFor(expenseChange)}
-        />
-        <StatCard
-          label={t.dashboard.savingsRate}
-          value={metrics.rate === null ? '—' : f.percent(metrics.rate)}
-          icon={Percent}
-          tone="neutral"
-          delta={
-            metrics.rateChange !== null && rateText ? <Delta value={metrics.rateChange} text={rateText} /> : undefined
-          }
-          caption={
-            metrics.rate === null
-              ? t.dashboard.noIncome
-              : period === 'all'
-                ? t.dashboard.savingsRateHint
-                : metrics.rateChange === null
-                  ? t.dashboard.noComparison
-                  : comparisonCaption
-          }
-        />
+      <div className="grid gap-4 xl:grid-cols-12">
+        <section className="hero-card flex min-h-[290px] flex-col p-6 sm:p-7 xl:col-span-5" aria-labelledby="balance-title">
+          <div className="relative flex items-start justify-between gap-4">
+            <div className="min-w-0">
+              <h2 id="balance-title" className="text-sm font-medium text-[var(--hero-muted)]">
+                {t.dashboard.balance}
+              </h2>
+              <p className="mt-3 truncate font-display text-[40px] font-semibold leading-none tracking-[-0.045em] sm:text-[48px]">
+                {f.money(metrics.balance)}
+              </p>
+            </div>
+            <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-white/10 ring-1 ring-white/15" aria-hidden="true">
+              <Landmark className="size-5" />
+            </span>
+          </div>
+          <div className="relative mt-4 flex flex-wrap items-center gap-2 text-[13px] text-[var(--hero-muted)]">
+            {metrics.balanceChange !== null && (
+              <span
+                className={`num inline-flex items-center gap-0.5 rounded-full px-2 py-0.5 text-xs font-semibold ${
+                  metrics.balanceChange >= 0 ? 'bg-emerald-400/15 text-emerald-300' : 'bg-rose-400/15 text-rose-300'
+                }`}
+              >
+                {metrics.balanceChange >= 0 ? (
+                  <ArrowUpRight className="size-3.5" aria-hidden="true" strokeWidth={2.5} />
+                ) : (
+                  <ArrowDownRight className="size-3.5" aria-hidden="true" strokeWidth={2.5} />
+                )}
+                {f.signedPercent(metrics.balanceChange)}
+              </span>
+            )}
+            <span>{metrics.balanceChange === null ? t.dashboard.noComparison : t.dashboard.comparison.balance}</span>
+          </div>
+          <div className="relative mt-auto flex min-h-[112px] flex-1 flex-col pt-7">
+            <div className="min-h-[80px] flex-1">
+              <Sparkline
+                values={trends.balance}
+                labels={trends.labels}
+                color="#a5b4fc"
+                format={f.money}
+                label={t.dashboard.balanceTrend}
+                height="fill"
+                inverse
+              />
+            </div>
+            <div className="mt-2.5 flex items-center justify-between gap-3 whitespace-nowrap text-[11px] font-medium text-[var(--hero-muted)]">
+              <span>{trends.axisStart}</span>
+              <span className="hidden truncate sm:inline">{t.dashboard.balanceTrend}</span>
+              <span>{trends.axisEnd}</span>
+            </div>
+          </div>
+        </section>
+
+        <div className="grid gap-4 sm:grid-cols-3 xl:col-span-7 xl:grid-cols-1">
+          <StatCard
+            label={t.dashboard.income}
+            value={f.money(metrics.current.income)}
+            icon={TrendingUp}
+            tone="income"
+            delta={deltaFor(incomeChange)}
+            caption={captionFor(incomeChange)}
+            trend={{
+              values: trends.income,
+              labels: trends.shortLabels,
+              color: 'var(--income)',
+              format: f.money,
+              label: t.dashboard.trendLabel(t.dashboard.income),
+            }}
+          />
+          <StatCard
+            label={t.dashboard.expenses}
+            value={f.money(metrics.current.expense)}
+            icon={TrendingDown}
+            tone="expense"
+            delta={deltaFor(expenseChange, false)}
+            caption={captionFor(expenseChange)}
+            trend={{
+              values: trends.expense,
+              labels: trends.shortLabels,
+              color: 'var(--expense)',
+              format: f.money,
+              label: t.dashboard.trendLabel(t.dashboard.expenses),
+            }}
+          />
+          <StatCard
+            label={t.dashboard.savingsRate}
+            value={metrics.rate === null ? '—' : f.percent(metrics.rate)}
+            icon={Percent}
+            tone="primary"
+            delta={
+              metrics.rateChange !== null && rateText ? <Delta value={metrics.rateChange} text={rateText} /> : undefined
+            }
+            caption={
+              metrics.rate === null
+                ? t.dashboard.noIncome
+                : period === 'all'
+                  ? t.dashboard.savingsRateHint
+                  : metrics.rateChange === null
+                    ? t.dashboard.noComparison
+                    : comparisonCaption
+            }
+            trend={{
+              values: trends.rate,
+              labels: trends.shortLabels,
+              color: 'var(--primary)',
+              format: (value) => f.percent(value),
+              label: t.dashboard.trendLabel(t.dashboard.savingsRate),
+            }}
+          />
+        </div>
       </div>
 
       <div className="grid gap-6 xl:grid-cols-3">

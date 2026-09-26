@@ -57,7 +57,7 @@ export function SegmentedControl<T extends string>({
     <div
       role="radiogroup"
       aria-label={label}
-      className={`max-w-full rounded-xl border border-line bg-surface-2 p-1 ${display} ${className}`}
+      className={`max-w-full rounded-full border border-line bg-surface-2 p-1 ${display} ${className}`}
     >
       {options.map((option, index) => {
         const selected = option.value === value;
@@ -74,10 +74,12 @@ export function SegmentedControl<T extends string>({
             tabIndex={selected ? 0 : -1}
             onClick={() => onChange(option.value)}
             onKeyDown={(event) => onKeyDown(event, index)}
-            className={`inline-flex min-w-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-[9px] font-semibold transition-all duration-150 ${
-              size === 'sm' ? 'h-8 px-3 text-[13px]' : 'h-10 px-4 text-sm'
+            className={`inline-flex min-w-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-full font-semibold transition-all duration-200 ${
+              size === 'sm' ? 'h-8 px-3.5 text-[13px]' : 'h-10 px-4 text-sm'
             } ${fullWidth ? 'flex-1' : ''} ${
-              selected ? 'bg-surface text-ink shadow-card ring-1 ring-line' : 'text-muted hover:text-ink'
+              selected
+                ? 'bg-surface text-ink shadow-[0_1px_2px_rgb(18_19_26/0.08),0_2px_8px_-2px_rgb(18_19_26/0.1)] ring-1 ring-line'
+                : 'text-muted hover:text-ink'
             }`}
           >
             {Icon && <Icon className="size-4 shrink-0" aria-hidden="true" />}

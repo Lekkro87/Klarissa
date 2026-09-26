@@ -88,6 +88,7 @@ export function StatisticsPage() {
   return (
     <div className="space-y-6">
       <PageIntro
+        title={t.nav.statistics}
         subtitle={t.statistics.subtitle}
         actions={
           <SegmentedControl

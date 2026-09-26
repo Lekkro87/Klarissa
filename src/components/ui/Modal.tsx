@@ -122,7 +122,7 @@ export function Modal({
   return createPortal(
     <div className="fixed inset-0 z-[60] flex items-end justify-center sm:items-center sm:p-6">
       <div
-        className="animate-fade absolute inset-0 bg-[var(--backdrop)] backdrop-blur-[2px]"
+        className="animate-fade absolute inset-0 bg-[var(--backdrop)] backdrop-blur-[3px]"
         aria-hidden="true"
         onMouseDown={() => onCloseRef.current()}
       />
@@ -133,7 +133,7 @@ export function Modal({
         aria-labelledby={titleId}
         aria-describedby={description ? descriptionId : undefined}
         tabIndex={-1}
-        className={`animate-sheet sm:animate-pop relative flex max-h-[92dvh] w-full flex-col overflow-hidden rounded-t-[26px] border border-line bg-surface shadow-pop outline-none sm:rounded-[22px] ${WIDTHS[size]}`}
+        className={`animate-sheet sm:animate-pop relative flex max-h-[92dvh] w-full flex-col overflow-hidden rounded-t-[28px] border border-line bg-surface shadow-pop outline-none sm:rounded-[26px] ${WIDTHS[size]}`}
       >
         <div className="mx-auto mt-2.5 h-1.5 w-11 shrink-0 rounded-full bg-line-strong sm:hidden" aria-hidden="true" />
         <div className="flex items-start gap-3 px-5 pb-2 pt-4 sm:px-6 sm:pt-6">

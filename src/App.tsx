@@ -1,7 +1,6 @@
-import { Plus } from 'lucide-react';
 import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Header } from './components/layout/Header';
-import { MobileDrawer, Sidebar } from './components/layout/Navigation';
+import { MobileDrawer, MobileTabBar, Sidebar } from './components/layout/Navigation';
 import { TransactionModal } from './components/transactions/TransactionModal';
 import { useConfirm } from './components/ui/ConfirmDialog';
 import { ToastViewport, useToast } from './components/ui/Toast';
@@ -194,7 +193,7 @@ export function App() {
       <Sidebar {...navProps} />
       <MobileDrawer {...navProps} open={drawerOpen} onClose={() => setDrawerOpen(false)} />
 
-      <div className="min-h-dvh lg:pl-[272px]">
+      <div className="min-h-dvh lg:pl-[280px]">
         <Header
           route={route}
           onOpenMenu={() => setDrawerOpen(true)}
@@ -207,22 +206,14 @@ export function App() {
           isDark={isDark}
           onToggleTheme={() => actions.updateSettings({ theme: isDark ? 'light' : 'dark' })}
         />
-        <main id="main" tabIndex={-1} className="mx-auto max-w-[1440px] px-4 pb-28 pt-6 outline-none sm:px-6 sm:pt-8 lg:px-8 lg:pb-14">
+        <main id="main" tabIndex={-1} className="mx-auto max-w-[1440px] px-4 pb-32 pt-6 outline-none sm:px-6 sm:pt-8 lg:px-8 lg:pb-14">
           <div key={route} className="animate-page">
             {page}
           </div>
         </main>
       </div>
 
-      <button
-        type="button"
-        onClick={() => ui.openTransaction()}
-        aria-label={t.actions.addTransaction}
-        title={t.actions.addTransaction}
-        className="fixed bottom-[calc(env(safe-area-inset-bottom,0px)+20px)] right-5 z-40 grid size-14 place-items-center rounded-2xl bg-primary text-primary-fg shadow-pop transition-transform hover:bg-primary-hover active:scale-95 lg:hidden"
-      >
-        <Plus className="size-6" aria-hidden="true" strokeWidth={2.5} />
-      </button>
+      <MobileTabBar route={route} onNavigate={(next) => navigate(next)} onAddTransaction={() => ui.openTransaction()} />
 
       <TransactionModal
         open={txModal.open}

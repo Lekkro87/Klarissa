@@ -76,6 +76,7 @@ export function GoalsPage() {
   return (
     <div className="space-y-6">
       <PageIntro
+        title={t.nav.goals}
         subtitle={t.goals.subtitle}
         actions={
           <Button icon={Plus} onClick={() => setEditor({ goal: null })}>

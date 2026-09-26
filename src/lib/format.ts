@@ -15,6 +15,8 @@ export interface Formatters {
   number: (value: number, digits?: number) => string;
   date: (iso: string) => string;
   dateLong: (iso: string) => string;
+  weekdayDate: (iso: string) => string;
+  dayHeading: (iso: string) => string;
   dayMonth: (iso: string) => string;
   monthYear: (ym: YearMonth) => string;
   monthName: (ym: YearMonth) => string;
@@ -53,6 +55,8 @@ export function createFormatters(language: Language, currency: Currency): Format
   const date = new Intl.DateTimeFormat(locale, { day: '2-digit', month: '2-digit', year: 'numeric' });
   const dateLong = new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'long', year: 'numeric' });
   const dayMonth = new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'short' });
+  const weekdayDate = new Intl.DateTimeFormat(locale, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+  const dayHeading = new Intl.DateTimeFormat(locale, { weekday: 'short', day: 'numeric', month: 'long' });
   const monthYear = new Intl.DateTimeFormat(locale, { month: 'long', year: 'numeric' });
   const monthName = new Intl.DateTimeFormat(locale, { month: 'long' });
   const monthShort = new Intl.DateTimeFormat(locale, { month: 'short' });
@@ -76,6 +80,8 @@ export function createFormatters(language: Language, currency: Currency): Format
     number: (value, digits = 0) => withMinus(numberFormat(digits).format(value)),
     date: (iso) => date.format(parseISODate(iso)),
     dateLong: (iso) => dateLong.format(parseISODate(iso)),
+    weekdayDate: (iso) => weekdayDate.format(parseISODate(iso)),
+    dayHeading: (iso) => dayHeading.format(parseISODate(iso)),
     dayMonth: (iso) => dayMonth.format(parseISODate(iso)),
     monthYear: (ym) => monthYear.format(new Date(ym.year, ym.month - 1, 1)),
     monthName: (ym) => monthName.format(new Date(ym.year, ym.month - 1, 1)),

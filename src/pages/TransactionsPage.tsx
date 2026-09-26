@@ -61,6 +61,7 @@ export function TransactionsPage({ filters, onFiltersChange }: TransactionsPageP
   return (
     <div className="space-y-6">
       <PageIntro
+        title={t.nav.transactions}
         subtitle={t.transactions.subtitle}
         actions={
           <Button icon={Plus} onClick={() => ui.openTransaction()}>
@@ -93,7 +94,7 @@ export function TransactionsPage({ filters, onFiltersChange }: TransactionsPageP
             <SummaryTile label={t.common.balance} value={f.money(totals.net)} />
           </div>
 
-          <Card padded={false} className="overflow-hidden">
+          <Card padded={false} className="overflow-clip">
             {filtered.length === 0 ? (
               <EmptyState
                 icon={SearchX}
@@ -107,7 +108,12 @@ export function TransactionsPage({ filters, onFiltersChange }: TransactionsPageP
               />
             ) : (
               <>
-                <TransactionList transactions={visible} onEdit={(tx) => ui.openTransaction(tx)} onDelete={ui.deleteTransaction} />
+                <TransactionList
+                  transactions={visible}
+                  onEdit={(tx) => ui.openTransaction(tx)}
+                  onDelete={ui.deleteTransaction}
+                  groupByDate={filters.sort === 'newest' || filters.sort === 'oldest'}
+                />
                 <Pagination page={currentPage} pageSize={PAGE_SIZE} total={filtered.length} onPageChange={changePage} />
               </>
             )}

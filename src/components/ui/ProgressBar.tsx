@@ -17,7 +17,7 @@ interface ProgressBarProps {
   size?: 'sm' | 'md' | 'lg';
 }
 
-const HEIGHTS = { sm: 'h-1.5', md: 'h-2', lg: 'h-3' };
+const HEIGHTS = { sm: 'h-1.5', md: 'h-2', lg: 'h-2.5' };
 
 export function ProgressBar({ percent, label, valueText, color = 'var(--primary)', size = 'md' }: ProgressBarProps) {
   const safe = Number.isFinite(percent) ? Math.max(0, percent) : 0;
@@ -31,11 +31,14 @@ export function ProgressBar({ percent, label, valueText, color = 'var(--primary)
       aria-valuenow={Math.round(width)}
       aria-valuetext={valueText}
       className={`w-full overflow-hidden rounded-full ${HEIGHTS[size]}`}
-      style={{ background: `color-mix(in srgb, ${color} 16%, var(--surface-3))` }}
+      style={{ background: `color-mix(in srgb, ${color} 13%, var(--surface-3))` }}
     >
       <div
         className="animate-grow h-full rounded-full transition-[width,background-color] duration-500 ease-out"
-        style={{ width: `${width}%`, background: color }}
+        style={{
+          width: `${width}%`,
+          background: `linear-gradient(90deg, color-mix(in srgb, ${color} 62%, var(--surface)) 0%, ${color} 100%)`,
+        }}
       />
     </div>
   );

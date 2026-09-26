@@ -1,5 +1,7 @@
 import { ChevronLeft, ChevronRight, Pencil, Trash2 } from 'lucide-react';
-import { useI18n } from '../../state/store';
+import { useMemo } from 'react';
+import { addDays } from '../../lib/dates';
+import { useI18n, useToday } from '../../state/store';
 import type { Transaction } from '../../types';
 import { IconButton } from '../ui/Button';
 import { Amount, CategoryBubble, TypeBadge, useTransactionTitle } from './TransactionBits';
@@ -8,18 +10,31 @@ interface TransactionListProps {
   transactions: Transaction[];
   onEdit: (tx: Transaction) => void;
   onDelete: (tx: Transaction) => void;
+  /** Auf dem Smartphone nach Tagen gruppieren (bei Sortierung nach Datum) */
+  groupByDate?: boolean;
 }
 
-/** Tabelle ab 768 px, darunter eine Kartenansicht. */
-export function TransactionList({ transactions, onEdit, onDelete }: TransactionListProps) {
+/** Tabelle ab 768 px, darunter eine Kartenansicht (optional nach Tagen gruppiert). */
+export function TransactionList({ transactions, onEdit, onDelete, groupByDate = false }: TransactionListProps) {
   const { t } = useI18n();
+  const groups = useMemo(() => {
+    if (!groupByDate) return [{ date: null as string | null, items: transactions }];
+    const result: { date: string | null; items: Transaction[] }[] = [];
+    for (const tx of transactions) {
+      const last = result[result.length - 1];
+      if (last && last.date === tx.date) last.items.push(tx);
+      else result.push({ date: tx.date, items: [tx] });
+    }
+    return result;
+  }, [transactions, groupByDate]);
+
   return (
     <>
       <div className="hidden overflow-x-auto md:block">
         <table className="w-full min-w-[640px] border-collapse text-sm">
           <caption className="sr-only">{t.transactions.tableCaption}</caption>
           <thead>
-            <tr className="border-b border-line text-left text-xs font-semibold uppercase tracking-[0.06em] text-muted">
+            <tr className="border-b border-line bg-surface-2 text-left text-[11.5px] font-semibold uppercase tracking-[0.07em] text-muted">
               <th scope="col" className="py-3 pl-6 pr-3 font-semibold">
                 {t.transactions.columns.date}
               </th>
@@ -51,12 +66,32 @@ export function TransactionList({ transactions, onEdit, onDelete }: TransactionL
         </table>
       </div>
 
-      <ul className="divide-y divide-line md:hidden">
-        {transactions.map((tx) => (
-          <TransactionCard key={tx.id} tx={tx} onEdit={onEdit} onDelete={onDelete} />
+      <div className="md:hidden">
+        {groups.map((group, index) => (
+          <section key={group.date ?? index} aria-label={group.date ? undefined : t.transactions.tableCaption}>
+            {group.date && <DayHeading date={group.date} items={group.items} />}
+            <ul className="divide-y divide-line">
+              {group.items.map((tx) => (
+                <TransactionCard key={tx.id} tx={tx} onEdit={onEdit} onDelete={onDelete} showDate={!group.date} />
+              ))}
+            </ul>
+          </section>
         ))}
-      </ul>
+      </div>
     </>
+  );
+}
+
+function DayHeading({ date, items }: { date: string; items: Transaction[] }) {
+  const { t, f } = useI18n();
+  const today = useToday();
+  const label = date === today ? t.common.today : date === addDays(today, -1) ? t.common.yesterday : f.dayHeading(date);
+  const net = items.reduce((sum, tx) => sum + (tx.type === 'income' ? 1 : -1) * Math.round(tx.amount * 100), 0) / 100;
+  return (
+    <h3 className="sticky top-[68px] z-[1] flex items-center justify-between gap-3 border-y border-line bg-surface-2/95 px-4 py-2 text-[12px] font-semibold uppercase tracking-[0.06em] text-muted backdrop-blur first:border-t-0">
+      <span>{label}</span>
+      <span className="num normal-case tracking-normal">{f.money(net)}</span>
+    </h3>
   );
 }
 
@@ -64,13 +99,14 @@ interface RowProps {
   tx: Transaction;
   onEdit: (tx: Transaction) => void;
   onDelete: (tx: Transaction) => void;
+  showDate?: boolean;
 }
 
 function TransactionRow({ tx, onEdit, onDelete }: RowProps) {
   const { t, f } = useI18n();
   const title = useTransactionTitle()(tx);
   return (
-    <tr className="group border-b border-line transition-colors last:border-b-0 hover:bg-surface-2">
+    <tr className="group border-b border-line transition-colors last:border-b-0 hover:bg-surface-2/70">
       <td className="num whitespace-nowrap py-3 pl-6 pr-3 text-ink-2">{f.date(tx.date)}</td>
       <td className="max-w-[280px] px-3 py-3">
         <div className="flex items-center gap-3">
@@ -98,10 +134,14 @@ function TransactionRow({ tx, onEdit, onDelete }: RowProps) {
   );
 }
 
-function TransactionCard({ tx, onEdit, onDelete }: RowProps) {
+function TransactionCard({ tx, onEdit, onDelete, showDate = true }: RowProps) {
   const { t, f } = useI18n();
   const title = useTransactionTitle()(tx);
-  const meta = [t.categories[tx.category], f.date(tx.date), tx.paymentMethod ? t.paymentMethods[tx.paymentMethod] : null]
+  const meta = [
+    t.categories[tx.category],
+    showDate ? f.date(tx.date) : null,
+    tx.paymentMethod ? t.paymentMethods[tx.paymentMethod] : null,
+  ]
     .filter(Boolean)
     .join(' · ');
   return (

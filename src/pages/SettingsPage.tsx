@@ -137,7 +137,7 @@ export function SettingsPage() {
 
   return (
     <div className="space-y-6">
-      <PageIntro subtitle={t.settings.subtitle} />
+      <PageIntro title={t.nav.settings} subtitle={t.settings.subtitle} />
 
       <div className="grid gap-6 xl:grid-cols-2">
         <SettingsSection icon={UserRound} title={t.settings.profile} text={t.settings.profileText}>
