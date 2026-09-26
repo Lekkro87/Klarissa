@@ -249,5 +249,24 @@ export function createDemoData(today: string, language: Language, settings: Sett
     },
   ];
 
-  return { transactions, budgets, goals, settings: { ...settings }, account: { openingBalance: 0 } };
+  // Beispiel-Bargeldbestand im Portemonnaie (getrennt vom Bankkonto)
+  const cash = {
+    counts: {
+      'note-5000': 1,
+      'note-2000': 2,
+      'note-1000': 1,
+      'note-500': 3,
+      'coin-200': 2,
+      'coin-100': 3,
+      'coin-50': 2,
+      'coin-20': 4,
+      'coin-10': 3,
+      'coin-5': 2,
+      'coin-2': 5,
+      'coin-1': 4,
+    },
+    updatedAt: createdAt,
+  };
+
+  return { transactions, budgets, goals, settings: { ...settings }, account: { openingBalance: 0 }, cash };
 }

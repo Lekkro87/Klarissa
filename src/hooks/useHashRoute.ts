@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 
-export const ROUTES = ['dashboard', 'transactions', 'budget', 'statistics', 'goals', 'settings'] as const;
+export const ROUTES = ['dashboard', 'transactions', 'budget', 'statistics', 'goals', 'cash', 'settings'] as const;
 export type Route = (typeof ROUTES)[number];
 
 const isRoute = (value: string): value is Route => (ROUTES as readonly string[]).includes(value);

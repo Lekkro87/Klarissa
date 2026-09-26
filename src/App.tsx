@@ -10,6 +10,7 @@ import { collectWarnings, summarizeMonthBudgets } from './lib/calculations';
 import { ymOf } from './lib/dates';
 import { DEFAULT_FILTERS, type TxFilters } from './lib/transactionFilters';
 import { BudgetPage } from './pages/BudgetPage';
+import { CashPage } from './pages/CashPage';
 import { DashboardPage } from './pages/DashboardPage';
 import { GoalsPage } from './pages/GoalsPage';
 import { SettingsPage } from './pages/SettingsPage';
@@ -143,6 +144,10 @@ export function App() {
       navigate,
       openTransaction: (tx = null, type = 'expense') => setTxModal({ open: true, tx, type }),
       deleteTransaction,
+      showTransactions: (patch) => {
+        setFilters({ ...DEFAULT_FILTERS, ...patch });
+        navigate('transactions');
+      },
       intent,
       clearIntent: () => setIntent(null),
     }),
@@ -174,6 +179,9 @@ export function App() {
       break;
     case 'goals':
       page = <GoalsPage />;
+      break;
+    case 'cash':
+      page = <CashPage />;
       break;
     case 'settings':
       page = <SettingsPage />;

@@ -2,6 +2,7 @@ import {
   ArrowDownRight,
   ArrowRight,
   ArrowUpRight,
+  Coins,
   Landmark,
   Percent,
   PiggyBank,
@@ -23,6 +24,7 @@ import { Card, CardHeader } from '../components/ui/Card';
 import { Delta } from '../components/ui/Delta';
 import { EmptyState } from '../components/ui/EmptyState';
 import { SegmentedControl } from '../components/ui/SegmentedControl';
+import { summarizeCash } from '../lib/cash';
 import {
   balanceUntil,
   categoryBreakdown,
@@ -77,6 +79,7 @@ export function DashboardPage() {
 
   const { transactions, budgets, goals, settings, account } = data;
   const opening = account.openingBalance ?? 0;
+  const cashTotal = summarizeCash(data.cash.counts, settings.currency).total;
   const ym = ymOf(today);
   const firstName = settings.name.trim().split(/\s+/)[0] || settings.name;
 
@@ -235,6 +238,18 @@ export function DashboardPage() {
             )}
             <span>{metrics.balanceChange === null ? t.dashboard.noComparison : t.dashboard.comparison.balance}</span>
           </div>
+          <button
+            type="button"
+            onClick={() => ui.navigate('cash')}
+            title={t.cash.openCash}
+            className="relative mt-4 inline-flex max-w-full items-center gap-2 self-start rounded-full bg-white/10 py-1.5 pl-1.5 pr-3.5 text-[13px] text-[var(--hero-muted)] ring-1 ring-white/15 transition-colors hover:bg-white/15"
+          >
+            <span className="grid size-6 place-items-center rounded-full bg-[#86efc4]/20 text-[#86efc4]" aria-hidden="true">
+              <Coins className="size-3.5" />
+            </span>
+            <span className="truncate">{t.cash.dashboardLabel}:</span>
+            <strong className="num font-semibold text-white">{f.money(cashTotal)}</strong>
+          </button>
           <div className="relative mt-auto flex min-h-[112px] flex-1 flex-col pt-7">
             <div className="min-h-[80px] flex-1">
               <Sparkline

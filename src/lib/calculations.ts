@@ -10,6 +10,7 @@ import {
   ymKey,
   ymOf,
 } from './dates';
+import { affectsBankBalance } from './cash';
 import { toCents } from './money';
 
 /*
@@ -40,12 +41,14 @@ export function filterByRange(transactions: readonly Transaction[], range: DateR
 }
 
 /**
- * Kontostand = Startguthaben + Summe aller Einnahmen − Summe aller Ausgaben
- * (optional nur bis einschließlich `untilISO`).
+ * Kontostand (Bankkonto) = Startguthaben + Einnahmen − Ausgaben
+ * (optional nur bis einschließlich `untilISO`). Bargeld-Zahlungen
+ * zählen nicht dazu – Bargeld wird separat geführt.
  */
 export function balanceUntil(transactions: readonly Transaction[], untilISO?: string, opening = 0): number {
   let cents = toCents(opening);
   for (const tx of transactions) {
+    if (!affectsBankBalance(tx)) continue;
     if (untilISO !== undefined && tx.date > untilISO) continue;
     cents += tx.type === 'income' ? toCents(tx.amount) : -toCents(tx.amount);
   }
@@ -69,7 +72,7 @@ export interface SeriesPoint {
   income: number;
   expense: number;
   net: number;
-  /** Kontostand am Ende des Abschnitts */
+  /** Kontostand des Bankkontos am Ende des Abschnitts (ohne Bargeld) */
   balance: number;
 }
 
@@ -80,26 +83,29 @@ function buildSeries(
   firstKeyStart: string,
   opening: number,
 ): SeriesPoint[] {
-  const buckets = new Map<string, { income: number; expense: number }>();
-  for (const key of keys) buckets.set(key, { income: 0, expense: 0 });
+  const buckets = new Map<string, { income: number; expense: number; bank: number }>();
+  for (const key of keys) buckets.set(key, { income: 0, expense: 0, bank: 0 });
 
   let openingBalance = toCents(opening);
   for (const tx of transactions) {
     const cents = toCents(tx.amount);
+    const signed = tx.type === 'income' ? cents : -cents;
+    const bank = affectsBankBalance(tx);
     if (tx.date < firstKeyStart) {
-      openingBalance += tx.type === 'income' ? cents : -cents;
+      if (bank) openingBalance += signed;
       continue;
     }
     const bucket = buckets.get(keyOf(tx));
     if (!bucket) continue;
     if (tx.type === 'income') bucket.income += cents;
     else bucket.expense += cents;
+    if (bank) bucket.bank += signed;
   }
 
   let running = openingBalance;
   return keys.map((key) => {
-    const bucket = buckets.get(key) ?? { income: 0, expense: 0 };
-    running += bucket.income - bucket.expense;
+    const bucket = buckets.get(key) ?? { income: 0, expense: 0, bank: 0 };
+    running += bucket.bank;
     return {
       key,
       income: bucket.income / 100,

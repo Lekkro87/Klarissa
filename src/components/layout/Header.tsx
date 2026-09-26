@@ -104,7 +104,9 @@ export function Header({
         <IconButton icon={Menu} label={t.nav.openMenu} onClick={onOpenMenu} className="-ml-2 lg:hidden" />
         <div className="flex min-w-0 flex-1 items-center gap-2.5 md:hidden" aria-hidden="true">
           <LogoMark size="sm" />
-          <span className="truncate font-display text-[17px] font-semibold tracking-[-0.03em] text-ink">{t.app.name}</span>
+          <span className="hidden truncate font-display text-[17px] font-semibold tracking-[-0.03em] text-ink min-[360px]:inline">
+            {t.app.name}
+          </span>
         </div>
 
         <div className="hidden w-full max-w-md md:block">{searchField(`${searchId}-desktop`, desktopInput)}</div>

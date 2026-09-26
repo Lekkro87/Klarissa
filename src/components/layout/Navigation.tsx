@@ -1,6 +1,7 @@
 import {
   ArrowLeftRight,
   ChartColumn,
+  Coins,
   LayoutDashboard,
   type LucideIcon,
   PiggyBank,
@@ -20,6 +21,7 @@ const MAIN_ITEMS: { route: Route; icon: LucideIcon }[] = [
   { route: 'budget', icon: Wallet },
   { route: 'statistics', icon: ChartColumn },
   { route: 'goals', icon: PiggyBank },
+  { route: 'cash', icon: Coins },
 ];
 
 const ACCOUNT_ITEMS: { route: Route; icon: LucideIcon }[] = [{ route: 'settings', icon: Settings }];

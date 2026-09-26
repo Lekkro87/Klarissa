@@ -83,10 +83,19 @@ export interface Account {
   openingBalance: number | null;
 }
 
+/** Bargeldbestand – getrennt vom Bankkonto, gezählt nach Scheinen und Münzen. */
+export interface CashWallet {
+  /** Anzahl je Stückelung, Schlüssel z. B. „note-2000“ oder „coin-50“ */
+  counts: Record<string, number>;
+  /** ISO-Zeitstempel der letzten Änderung */
+  updatedAt: string | null;
+}
+
 export interface AppData {
   transactions: Transaction[];
   budgets: Budget[];
   goals: SavingsGoal[];
   settings: Settings;
   account: Account;
+  cash: CashWallet;
 }

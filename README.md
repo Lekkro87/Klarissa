@@ -9,6 +9,7 @@ Klarissa ist eine moderne, vollständig funktionsfähige Budget-Tracker-Webanwen
 - **Transaktionen**: Einnahmen und Ausgaben hinzufügen, bearbeiten und löschen (mit Bestätigung und „Rückgängig“). Suche nach Beschreibung, Kategorie, Zahlungsmethode oder Betrag. Die Filter für Zeitraum (inkl. benutzerdefiniert), Typ, Kategorie und Zahlungsmethode lassen sich kombinieren. Sortierung nach Datum oder Betrag. Auf Mobilgeräten erscheint eine Kartenansicht, bei vielen Einträgen eine Seitennavigation.
 - **Budget**: Monatliche Budgets pro Kategorie plus ein Monatsbudget. Fortschrittsbalken und dezente Warnungen bei 75 %, 90 %, 100 % und bei Überschreitung (auch als Hinweis direkt beim Erfassen einer Ausgabe und in der Benachrichtigungsglocke). Budgets lassen sich aus dem Vormonat übernehmen.
 - **Statistiken**: Zeiträume 7 Tage, 30 Tage, 6 und 12 Monate. Verlauf der Einnahmen, der Ausgaben und des Kontostands, Donut-Diagramme nach Kategorie, größte Ausgaben sowie durchschnittliche monatliche und tägliche Ausgaben.
+- **Bargeld**: Scheine und Münzen zählen (Stückelungen passend zur gewählten Währung), mit Plus/Minus oder direkter Eingabe. Der Bargeldbestand wird getrennt vom Bankkonto geführt und nicht zum Kontostand gezählt. Transaktionen mit der Zahlungsmethode „Bargeld“ verändern den Kontostand ebenfalls nicht; die Barzahlungen des Monats werden auf der Bargeld-Seite zusammengefasst.
 - **Sparziele**: Ziele erstellen, bearbeiten, löschen und Beträge einzahlen oder entnehmen. Fortschritt, Zieldatum und die nötige Sparrate pro Monat werden angezeigt.
 - **Einstellungen**: Name, Kontostand korrigieren, Währung (EUR, USD, GBP, CHF), Erscheinungsbild (Hell, Dunkel, System), Sprache (Deutsch, Englisch), Datenexport und -import (JSON), Demo-Daten zurücksetzen, alle Daten löschen.
 
@@ -79,6 +80,7 @@ Transaktion: id, type, amount, category, description, date, paymentMethod, creat
 Budget:      id, category, amount, month, year
 Sparziel:    id, name, targetAmount, currentAmount, deadline, createdAt, color
 Konto:       openingBalance (Startguthaben)
+Bargeld:     counts (Anzahl je Schein/Münze, z. B. note-2000), updatedAt
 ```
 
 Alle Beträge werden intern centgenau summiert, damit keine Rundungsfehler entstehen.

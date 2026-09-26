@@ -11,6 +11,7 @@ import {
   DEFAULT_SETTINGS,
   loadData,
   sanitizeAccount,
+  sanitizeCash,
   sanitizeBudget,
   sanitizeData,
   sanitizeGoal,
@@ -22,6 +23,7 @@ import {
 import type {
   Account,
   AppData,
+  CashWallet,
   Budget,
   BudgetCategory,
   Language,
@@ -43,7 +45,8 @@ type Action =
   | { type: 'goal/upsert'; goal: SavingsGoal }
   | { type: 'goal/delete'; id: string }
   | { type: 'settings/update'; settings: Settings }
-  | { type: 'account/update'; account: Account };
+  | { type: 'account/update'; account: Account }
+  | { type: 'cash/update'; cash: CashWallet };
 
 function upsert<T extends { id: string }>(items: T[], item: T, prepend = false): T[] {
   const index = items.findIndex((entry) => entry.id === item.id);
@@ -83,6 +86,8 @@ function reducer(state: AppData, action: Action): AppData {
       return { ...state, settings: action.settings };
     case 'account/update':
       return { ...state, account: action.account };
+    case 'cash/update':
+      return { ...state, cash: action.cash };
     default:
       return state;
   }
@@ -92,7 +97,14 @@ type StartupNotice = 'corrupt' | 'unavailable' | { repaired: number } | null;
 
 /** Leerer Zustand vor der Einrichtung: Der Nutzer gibt zuerst seinen Kontostand an. */
 function emptyData(settings: Settings = DEFAULT_SETTINGS): AppData {
-  return { transactions: [], budgets: [], goals: [], settings: { ...settings }, account: { openingBalance: null } };
+  return {
+    transactions: [],
+    budgets: [],
+    goals: [],
+    settings: { ...settings },
+    account: { openingBalance: null },
+    cash: { counts: {}, updatedAt: null },
+  };
 }
 
 function initialize(): { data: AppData; notice: StartupNotice } {
@@ -141,6 +153,9 @@ export interface Actions {
   resetDemo: () => void;
   clearAll: () => void;
   completeOnboarding: (input: OnboardingInput) => void;
+  /** Setzt die Anzahl einer Münze bzw. eines Scheins im Bargeldbestand. */
+  setCashCount: (key: string, count: number) => void;
+  resetCash: () => void;
   /** Setzt den aktuellen Kontostand; das Startguthaben wird passend berechnet. */
   setCurrentBalance: (balance: number) => void;
 }
@@ -350,6 +365,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
         // Startguthaben so wählen, dass der Kontostand heute genau dem eingegebenen Betrag entspricht.
         const openingBalance = roundMoney(balance - balanceUntil(base.transactions));
         dispatch({ type: 'replace', data: { ...base, settings, account: { openingBalance } } });
+      },
+      setCashCount: (key, count) => {
+        const { cash } = stateRef.current;
+        const next = sanitizeCash({ counts: { ...cash.counts, [key]: count }, updatedAt: now() });
+        dispatch({ type: 'cash/update', cash: next });
+      },
+      resetCash: () => {
+        dispatch({ type: 'cash/update', cash: { counts: {}, updatedAt: now() } });
       },
       setCurrentBalance: (balance) => {
         if (!Number.isFinite(balance)) return;

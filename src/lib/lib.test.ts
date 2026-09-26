@@ -12,10 +12,11 @@ import {
   savingsRate,
   summarizeMonthBudgets,
 } from './calculations';
+import { formatDenomination, summarizeCash } from './cash';
 import { addMonths, isValidISODate, periodRange, startOfWeek } from './dates';
 import { createDemoData } from './demoData';
 import { parseAmount, parseSignedAmount } from './money';
-import { sanitizeAccount, sanitizeData, sanitizeTransaction } from './storage';
+import { sanitizeAccount, sanitizeCash, sanitizeData, sanitizeTransaction } from './storage';
 import { applyFilters, createSearchIndex, DEFAULT_FILTERS } from './transactionFilters';
 
 let counter = 0;
@@ -254,6 +255,41 @@ describe('Filter und Sortierung', () => {
     expect(lowest[0].description).toBe('Café');
     const none = applyFilters(list, { ...DEFAULT_FILTERS, paymentMethod: 'none' }, '2026-09-26', index);
     expect(none.map((item) => item.description)).toEqual(['Café']);
+  });
+});
+
+describe('Bargeld', () => {
+  it('summiert Scheine und Münzen', () => {
+    const summary = summarizeCash({ 'note-2000': 2, 'note-500': 1, 'coin-200': 3, 'coin-1': 4, 'coin-25': 9 }, 'EUR');
+    expect(summary).toEqual({ total: 51.04, notesTotal: 45, coinsTotal: 6.04, notesCount: 3, coinsCount: 7 });
+    // 25-Cent-Münzen gibt es nur beim US-Dollar
+    expect(summarizeCash({ 'coin-25': 4 }, 'USD').total).toBe(1);
+  });
+
+  it('beschriftet Stückelungen je Währung', () => {
+    expect(formatDenomination(2000, 'EUR', 'de').replace(/\u00a0/g, ' ')).toBe('20 €');
+    expect(formatDenomination(50, 'EUR', 'de')).toBe('50 ct');
+    expect(formatDenomination(25, 'USD', 'en')).toBe('25¢');
+    expect(formatDenomination(500, 'GBP', 'en')).toBe('£5');
+  });
+
+  it('zählt Bargeld-Zahlungen nicht zum Kontostand', () => {
+    const list = [
+      tx({ type: 'income', amount: 1000, category: 'salary', date: '2026-09-01' }),
+      tx({ amount: 40, paymentMethod: 'cash', date: '2026-09-05' }),
+      tx({ amount: 60, paymentMethod: 'creditCard', date: '2026-09-06' }),
+    ];
+    expect(balanceUntil(list)).toBe(940);
+    const [point] = monthlySeries(list, { year: 2026, month: 9 }, 1);
+    expect(point).toMatchObject({ income: 1000, expense: 100, balance: 940 });
+  });
+
+  it('bereinigt gespeicherte Zählungen', () => {
+    expect(sanitizeCash({ counts: { 'note-2000': 2.7, 'coin-50': -3, hack: 5, 'coin-10': 1e9 }, updatedAt: 'kaputt' })).toEqual({
+      counts: { 'note-2000': 2, 'coin-10': 9999 },
+      updatedAt: null,
+    });
+    expect(sanitizeCash(null)).toEqual({ counts: {}, updatedAt: null });
   });
 });
 

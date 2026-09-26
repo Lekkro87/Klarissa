@@ -1,6 +1,7 @@
 import type {
   Account,
   AppData,
+  CashWallet,
   Budget,
   Currency,
   GoalColor,
@@ -10,6 +11,7 @@ import type {
   ThemePreference,
   Transaction,
 } from '../types';
+import { MAX_PIECES } from './cash';
 import { isBudgetCategory, isCategoryOfType, isPaymentMethod } from './categories';
 import { isValidISODate } from './dates';
 import { isValidAmount, MAX_AMOUNT, roundMoney } from './money';
@@ -135,6 +137,23 @@ export function sanitizeAccount(value: unknown): Account {
   return { openingBalance: valid ? roundMoney(raw) : null };
 }
 
+const CASH_KEY = /^(note|coin)-\d{1,7}$/;
+
+export function sanitizeCash(value: unknown): CashWallet {
+  if (!isRecord(value)) return { counts: {}, updatedAt: null };
+  const counts: Record<string, number> = {};
+  if (isRecord(value.counts)) {
+    for (const [key, raw] of Object.entries(value.counts)) {
+      const count = typeof raw === 'string' ? Number(raw) : raw;
+      if (!CASH_KEY.test(key) || typeof count !== 'number' || !Number.isFinite(count)) continue;
+      const clamped = Math.min(MAX_PIECES, Math.max(0, Math.floor(count)));
+      if (clamped > 0) counts[key] = clamped;
+    }
+  }
+  const updatedAt = typeof value.updatedAt === 'string' && !Number.isNaN(Date.parse(value.updatedAt)) ? value.updatedAt : null;
+  return { counts, updatedAt };
+}
+
 function sanitizeList<T extends { id: string }>(
   value: unknown,
   sanitize: (item: unknown) => T | null,
@@ -189,6 +208,7 @@ export function sanitizeData(raw: unknown): SanitizeResult | null {
       goals: goals.items,
       settings: sanitizeSettings(source.settings),
       account: sanitizeAccount(source.account),
+      cash: sanitizeCash(source.cash),
     },
     dropped: transactions.dropped + budgets.dropped + goals.dropped,
   };
