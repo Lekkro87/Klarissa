@@ -18,6 +18,7 @@ import {
   ShoppingBag,
   ShoppingCart,
   TrendingUp,
+  UtensilsCrossed,
   Wallet,
 } from 'lucide-react';
 import type {
@@ -41,6 +42,7 @@ export const INCOME_CATEGORIES: readonly IncomeCategory[] = [
 export const EXPENSE_CATEGORIES: readonly ExpenseCategory[] = [
   'housing',
   'groceries',
+  'restaurants',
   'transport',
   'leisure',
   'shopping',
@@ -63,6 +65,7 @@ export const CATEGORY_ICONS: Record<Category, LucideIcon> = {
   otherIncome: CircleEllipsis,
   housing: House,
   groceries: ShoppingCart,
+  restaurants: UtensilsCrossed,
   transport: Car,
   leisure: Gamepad2,
   shopping: ShoppingBag,

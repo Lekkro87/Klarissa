@@ -4,7 +4,7 @@ import {
   Download,
   FileUp,
   Info,
-  Languages,
+  Landmark,
   Monitor,
   Moon,
   Palette,
@@ -24,7 +24,9 @@ import { Modal } from '../components/ui/Modal';
 import { SegmentedControl } from '../components/ui/SegmentedControl';
 import { useToast } from '../components/ui/Toast';
 import { MESSAGES } from '../i18n';
+import { balanceUntil } from '../lib/calculations';
 import { LOCALES } from '../lib/format';
+import { amountToInput, parseSignedAmount } from '../lib/money';
 import { CURRENCIES, NAME_MAX, sanitizeData, serializeData } from '../lib/storage';
 import { useActions, useData, useI18n } from '../state/store';
 import type { Currency, Language, ThemePreference } from '../types';
@@ -60,7 +62,7 @@ function SettingsSection({
 }
 
 export function SettingsPage() {
-  const { t, language } = useI18n();
+  const { t, f, language } = useI18n();
   const data = useData();
   const actions = useActions();
   const toast = useToast();
@@ -71,6 +73,8 @@ export function SettingsPage() {
   const [nameError, setNameError] = useState<string | null>(null);
   const [exportOpen, setExportOpen] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
+  const [balanceInput, setBalanceInput] = useState('');
+  const [balanceError, setBalanceError] = useState<string | null>(null);
 
   // Namen übernehmen, wenn er sich extern ändert (z. B. durch einen Import)
   useEffect(() => setName(settings.name), [settings.name]);
@@ -87,6 +91,30 @@ export function SettingsPage() {
       ) as Record<Currency, string>,
     [language],
   );
+
+  const currentBalance = useMemo(
+    () => balanceUntil(data.transactions, undefined, data.account.openingBalance ?? 0),
+    [data.transactions, data.account.openingBalance],
+  );
+
+  const saveBalance = (event: FormEvent) => {
+    event.preventDefault();
+    const parsed = parseSignedAmount(balanceInput, language);
+    if (!parsed.ok) {
+      setBalanceError(
+        parsed.error === 'required'
+          ? t.onboarding.balanceRequired
+          : parsed.error === 'tooLarge'
+            ? t.form.errors.amountTooLarge
+            : t.onboarding.balanceInvalid,
+      );
+      return;
+    }
+    actions.setCurrentBalance(parsed.value);
+    setBalanceInput('');
+    setBalanceError(null);
+    toast.show({ kind: 'success', message: t.toasts.balanceSaved });
+  };
 
   const saveName = (event: FormEvent) => {
     event.preventDefault();
@@ -162,6 +190,48 @@ export function SettingsPage() {
           </form>
         </SettingsSection>
 
+        <SettingsSection icon={Landmark} title={t.settings.balance} text={t.settings.balanceText}>
+          <div className="mb-4 grid grid-cols-2 gap-3">
+            <div className="min-w-0 rounded-2xl bg-surface-2 px-4 py-3">
+              <p className="truncate text-[13px] font-semibold text-muted">{t.settings.currentBalance}</p>
+              <p className="num mt-1 truncate font-display text-lg font-semibold tracking-[-0.02em] text-ink">
+                {f.money(currentBalance)}
+              </p>
+            </div>
+            <div className="min-w-0 rounded-2xl bg-surface-2 px-4 py-3">
+              <p className="truncate text-[13px] font-semibold text-muted">{t.settings.openingBalance}</p>
+              <p className="num mt-1 truncate font-display text-lg font-semibold tracking-[-0.02em] text-ink">
+                {f.money(data.account.openingBalance ?? 0)}
+              </p>
+            </div>
+          </div>
+          <form onSubmit={saveBalance} noValidate className="flex flex-col gap-3 sm:flex-row sm:items-start">
+            <Field id={`${id}-balance`} label={t.settings.newBalance} error={balanceError} className="flex-1">
+              <div className="control flex items-center gap-2">
+                <span className="font-semibold text-muted" aria-hidden="true">
+                  {f.currencySymbol}
+                </span>
+                <input
+                  {...fieldAria(`${id}-balance`, balanceError)}
+                  type="text"
+                  inputMode="decimal"
+                  autoComplete="off"
+                  placeholder={amountToInput(currentBalance, language)}
+                  value={balanceInput}
+                  onChange={(event) => {
+                    setBalanceInput(event.target.value.slice(0, 22));
+                    if (balanceError) setBalanceError(null);
+                  }}
+                  className="num h-full w-full min-w-0 bg-transparent font-semibold text-ink outline-none placeholder:text-line-strong"
+                />
+              </div>
+            </Field>
+            <Button type="submit" className="sm:mt-[30px]">
+              {t.settings.saveBalance}
+            </Button>
+          </form>
+        </SettingsSection>
+
         <SettingsSection icon={Wallet} title={t.settings.currency} text={t.settings.currencyText}>
           <fieldset>
             <legend className="sr-only">{t.settings.currency}</legend>
@@ -195,33 +265,38 @@ export function SettingsPage() {
           </fieldset>
         </SettingsSection>
 
-        <SettingsSection icon={Palette} title={t.settings.theme} text={t.settings.themeText}>
-          <SegmentedControl
-            label={t.settings.theme}
-            value={settings.theme}
-            onChange={changeTheme}
-            size="md"
-            fullWidth
-            options={[
-              { value: 'light', label: t.settings.themes.light, icon: Sun },
-              { value: 'dark', label: t.settings.themes.dark, icon: Moon },
-              { value: 'system', label: t.settings.themes.system, icon: Monitor },
-            ]}
-          />
-        </SettingsSection>
-
-        <SettingsSection icon={Languages} title={t.settings.language} text={t.settings.languageText}>
-          <SegmentedControl
-            label={t.settings.language}
-            value={settings.language}
-            onChange={changeLanguage}
-            size="md"
-            fullWidth
-            options={[
-              { value: 'de', label: t.settings.languages.de },
-              { value: 'en', label: t.settings.languages.en },
-            ]}
-          />
+        <SettingsSection icon={Palette} title={t.settings.appearance} text={t.settings.appearanceText}>
+          <div className="space-y-5">
+            <div>
+              <p className="mb-2 text-sm font-semibold text-ink-2">{t.settings.theme}</p>
+              <SegmentedControl
+                label={t.settings.theme}
+                value={settings.theme}
+                onChange={changeTheme}
+                size="md"
+                fullWidth
+                options={[
+                  { value: 'light', label: t.settings.themes.light, icon: Sun },
+                  { value: 'dark', label: t.settings.themes.dark, icon: Moon },
+                  { value: 'system', label: t.settings.themes.system, icon: Monitor },
+                ]}
+              />
+            </div>
+            <div>
+              <p className="mb-2 text-sm font-semibold text-ink-2">{t.settings.language}</p>
+              <SegmentedControl
+                label={t.settings.language}
+                value={settings.language}
+                onChange={changeLanguage}
+                size="md"
+                fullWidth
+                options={[
+                  { value: 'de', label: t.settings.languages.de },
+                  { value: 'en', label: t.settings.languages.en },
+                ]}
+              />
+            </div>
+          </div>
         </SettingsSection>
       </div>
 

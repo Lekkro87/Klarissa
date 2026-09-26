@@ -48,7 +48,8 @@ const TEXT = {
     groceries: ['Supermarkt REWE', 'Wocheneinkauf Aldi', 'Edeka', 'Lidl', 'Wochenmarkt', 'Bäckerei', 'dm Drogerie'],
     ticket: 'Deutschlandticket',
     transport: ['Bahnticket', 'Tanken', 'Carsharing', 'Taxi'],
-    leisure: ['Kino', 'Restaurant mit Freunden', 'Konzertticket', 'Bowling', 'Pizza-Abend', 'Kletterhalle'],
+    leisure: ['Kino', 'Konzertticket', 'Bowling', 'Kletterhalle', 'Museum', 'Freibad'],
+    restaurants: ['Restaurant mit Freunden', 'Mittagessen', 'Pizzeria Da Mario', 'Sushi-Bar', 'Burger-Laden', 'Café & Kuchen'],
     shopping: ['Zalando Bestellung', 'Amazon', 'Sneaker', 'Buchhandlung', 'Elektronik-Zubehör', 'IKEA'],
     netflix: 'Netflix',
     spotify: 'Spotify Premium',
@@ -75,7 +76,8 @@ const TEXT = {
     groceries: ['Supermarket', 'Weekly groceries', 'Organic store', 'Discount grocer', 'Farmers market', 'Bakery', 'Drugstore'],
     ticket: 'Monthly transit pass',
     transport: ['Train ticket', 'Fuel', 'Car sharing', 'Taxi'],
-    leisure: ['Cinema', 'Dinner with friends', 'Concert ticket', 'Bowling', 'Pizza night', 'Climbing gym'],
+    leisure: ['Cinema', 'Concert ticket', 'Bowling', 'Climbing gym', 'Museum', 'Outdoor pool'],
+    restaurants: ['Dinner with friends', 'Lunch', 'Pizzeria Da Mario', 'Sushi bar', 'Burger place', 'Coffee & cake'],
     shopping: ['Clothing order', 'Amazon', 'Sneakers', 'Bookstore', 'Electronics accessories', 'IKEA'],
     netflix: 'Netflix',
     spotify: 'Spotify Premium',
@@ -163,8 +165,11 @@ export function createDemoData(today: string, language: Language, settings: Sett
       // Aktueller Monat: bewusst so gewählt, dass Budgetwarnungen sichtbar werden.
       spread(ym, 312.4, [2, 6, 9, 13, 17, 21, 24], 'groceries', text.groceries);
       add(ym, 7, 'expense', 'leisure', 24.5, text.leisure[0], 'creditCard');
-      add(ym, 16, 'expense', 'leisure', 58.3, text.leisure[1], 'creditCard');
-      add(ym, 23, 'expense', 'leisure', 21.2, text.leisure[3], 'cash');
+      add(ym, 13, 'expense', 'leisure', 58.3, text.leisure[1], 'creditCard');
+      add(ym, 23, 'expense', 'leisure', 21.2, text.leisure[2], 'cash');
+      add(ym, 10, 'expense', 'restaurants', 12.9, text.restaurants[1], 'creditCard');
+      add(ym, 16, 'expense', 'restaurants', 46.8, text.restaurants[0], 'creditCard');
+      add(ym, 20, 'expense', 'restaurants', 24.6, text.restaurants[2], 'cash');
       add(ym, 8, 'expense', 'shopping', 59.99, text.shopping[0], 'paypal');
       add(ym, 19, 'expense', 'shopping', 79, text.shopping[2], 'creditCard');
       add(ym, 18, 'expense', 'transport', 34.9, text.transport[0], 'creditCard');
@@ -173,7 +178,8 @@ export function createDemoData(today: string, language: Language, settings: Sett
     }
 
     spread(ym, random.between(285, 365), [2, 6, 10, 14, 18, 22, 27], 'groceries', text.groceries);
-    spread(ym, random.between(95, 185), [8, 17, 25], 'leisure', text.leisure);
+    spread(ym, random.between(60, 140), [8, 17, 25], 'leisure', text.leisure);
+    spread(ym, random.between(70, 160), [5, 12, 19, 26], 'restaurants', text.restaurants);
     spread(ym, random.between(45, 150), random.chance(0.5) ? [11, 23] : [19], 'shopping', text.shopping);
     if (random.chance(0.6)) add(ym, 21, 'expense', 'transport', random.between(25, 70), random.pick(text.transport), 'creditCard');
     if (random.chance(0.5)) add(ym, 13, 'expense', 'health', random.between(12, 85), random.pick(text.health), 'cash');
@@ -191,6 +197,7 @@ export function createDemoData(today: string, language: Language, settings: Sett
     ['total', 2400],
     ['groceries', 400],
     ['leisure', 200],
+    ['restaurants', 150],
     ['transport', 200],
     ['shopping', 150],
     ['subscriptions', 40],
@@ -242,5 +249,5 @@ export function createDemoData(today: string, language: Language, settings: Sett
     },
   ];
 
-  return { transactions, budgets, goals, settings: { ...settings } };
+  return { transactions, budgets, goals, settings: { ...settings }, account: { openingBalance: 0 } };
 }

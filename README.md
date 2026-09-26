@@ -4,16 +4,18 @@ Klarissa ist eine moderne, vollständig funktionsfähige Budget-Tracker-Webanwen
 
 ## Funktionen
 
+- **Einrichtung beim ersten Start**: Du gibst deinen aktuellen Kontostand an (Pflicht, auch negativ möglich), wählst die Währung und optional deinen Namen. Danach startest du mit deinen eigenen Daten oder mit Beispieldaten zum Ausprobieren. Der Kontostand ergibt sich aus Startguthaben + Einnahmen − Ausgaben und lässt sich in den Einstellungen jederzeit korrigieren.
 - **Dashboard**: Kontostand, Einnahmen, Ausgaben und Sparquote mit Vergleich zum Vormonat, Diagramm „Einnahmen & Ausgaben“ (6 oder 12 Monate), Ausgaben nach Kategorie, Monatsvergleich, Budgetübersicht, letzte Transaktionen und Sparziele. Alle Werte werden live aus den gespeicherten Daten berechnet.
 - **Transaktionen**: Einnahmen und Ausgaben hinzufügen, bearbeiten und löschen (mit Bestätigung und „Rückgängig“). Suche nach Beschreibung, Kategorie, Zahlungsmethode oder Betrag. Die Filter für Zeitraum (inkl. benutzerdefiniert), Typ, Kategorie und Zahlungsmethode lassen sich kombinieren. Sortierung nach Datum oder Betrag. Auf Mobilgeräten erscheint eine Kartenansicht, bei vielen Einträgen eine Seitennavigation.
 - **Budget**: Monatliche Budgets pro Kategorie plus ein Monatsbudget. Fortschrittsbalken und dezente Warnungen bei 75 %, 90 %, 100 % und bei Überschreitung (auch als Hinweis direkt beim Erfassen einer Ausgabe und in der Benachrichtigungsglocke). Budgets lassen sich aus dem Vormonat übernehmen.
 - **Statistiken**: Zeiträume 7 Tage, 30 Tage, 6 und 12 Monate. Verlauf der Einnahmen, der Ausgaben und des Kontostands, Donut-Diagramme nach Kategorie, größte Ausgaben sowie durchschnittliche monatliche und tägliche Ausgaben.
 - **Sparziele**: Ziele erstellen, bearbeiten, löschen und Beträge einzahlen oder entnehmen. Fortschritt, Zieldatum und die nötige Sparrate pro Monat werden angezeigt.
-- **Einstellungen**: Name, Währung (EUR, USD, GBP, CHF), Erscheinungsbild (Hell, Dunkel, System), Sprache (Deutsch, Englisch), Datenexport und -import (JSON), Demo-Daten zurücksetzen, alle Daten löschen.
+- **Einstellungen**: Name, Kontostand korrigieren, Währung (EUR, USD, GBP, CHF), Erscheinungsbild (Hell, Dunkel, System), Sprache (Deutsch, Englisch), Datenexport und -import (JSON), Demo-Daten zurücksetzen, alle Daten löschen.
 
 Weitere Eigenschaften:
 
-- Realistische Demo-Daten der letzten 12 Monate beim ersten Start
+- Kategorien für Einnahmen (z. B. Gehalt, Nebenjob) und Ausgaben (z. B. Wohnen, Lebensmittel, Restaurants, Transport)
+- Optionale, realistische Beispieldaten der letzten 12 Monate
 - Leere Zustände, Formularvalidierung und Toast-Benachrichtigungen
 - Beschädigte Daten im Speicher werden erkannt und bereinigt, die App stürzt nicht ab
 - Barrierefreiheit: semantisches HTML, Labels, Tastaturbedienung (Taste `/` fokussiert die Suche, `Esc` schließt Dialoge), sichtbare Fokusrahmen und ARIA-Attribute
@@ -66,6 +68,7 @@ src/
     goals/                Sparziel-Karten und -Dialoge
     charts/               Balken-, Flächen- und Donut-Diagramme
     dashboard/            Kennzahlen-Karten
+    onboarding/           Einrichtung mit Kontostand-Abfrage beim ersten Start
     ui/                   Button, Card, Modal, ConfirmDialog, Toast, EmptyState, ProgressBar …
 ```
 
@@ -75,6 +78,7 @@ src/
 Transaktion: id, type, amount, category, description, date, paymentMethod, createdAt
 Budget:      id, category, amount, month, year
 Sparziel:    id, name, targetAmount, currentAmount, deadline, createdAt, color
+Konto:       openingBalance (Startguthaben)
 ```
 
 Alle Beträge werden intern centgenau summiert, damit keine Rundungsfehler entstehen.

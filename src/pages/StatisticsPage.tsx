@@ -24,7 +24,8 @@ function rangeBounds(range: StatsRange, today: string) {
 
 export function StatisticsPage() {
   const { t, f } = useI18n();
-  const { transactions } = useData();
+  const { transactions, account } = useData();
+  const opening = account.openingBalance ?? 0;
   const ui = useAppUi();
   const today = useToday();
   const titleOf = useTransactionTitle();
@@ -51,11 +52,11 @@ export function StatisticsPage() {
 
     const series =
       bounds.months > 0
-        ? monthlySeries(transactions, ymOf(today), bounds.months).map((point) => {
+        ? monthlySeries(transactions, ymOf(today), bounds.months, opening).map((point) => {
             const pointYm = ymOf(`${point.key}-01`);
             return { ...point, label: f.monthShort(pointYm), fullLabel: f.monthYear(pointYm) };
           })
-        : dailySeries(transactions, bounds.from, bounds.to).map((point) => ({
+        : dailySeries(transactions, bounds.from, bounds.to, opening).map((point) => ({
             ...point,
             label: f.dayMonth(point.key),
             fullLabel: f.dateLong(point.key),
@@ -80,7 +81,7 @@ export function StatisticsPage() {
       incomeCategories: categoryBreakdown(inRange, 'income'),
       largest,
     };
-  }, [transactions, range, today, f]);
+  }, [transactions, range, today, f, opening]);
 
   const monthsText = f.number(stats.months, Number.isInteger(stats.months) ? 0 : 1);
   const categoryLabel = (key: string) => t.categories[key as keyof typeof t.categories];

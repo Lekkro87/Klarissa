@@ -1,4 +1,5 @@
 import type {
+  Account,
   AppData,
   Budget,
   Currency,
@@ -127,6 +128,13 @@ export function sanitizeSettings(value: unknown): Settings {
   };
 }
 
+export function sanitizeAccount(value: unknown): Account {
+  if (!isRecord(value)) return { openingBalance: null };
+  const raw = typeof value.openingBalance === 'string' ? Number(value.openingBalance) : value.openingBalance;
+  const valid = typeof raw === 'number' && Number.isFinite(raw) && Math.abs(raw) <= MAX_AMOUNT * 10;
+  return { openingBalance: valid ? roundMoney(raw) : null };
+}
+
 function sanitizeList<T extends { id: string }>(
   value: unknown,
   sanitize: (item: unknown) => T | null,
@@ -180,6 +188,7 @@ export function sanitizeData(raw: unknown): SanitizeResult | null {
       budgets: dedupeBudgets(budgets.items),
       goals: goals.items,
       settings: sanitizeSettings(source.settings),
+      account: sanitizeAccount(source.account),
     },
     dropped: transactions.dropped + budgets.dropped + goals.dropped,
   };

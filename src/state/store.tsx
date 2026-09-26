@@ -3,11 +3,14 @@ import { MESSAGES, type Messages } from '../i18n';
 import { todayISO, type YearMonth } from '../lib/dates';
 import { createDemoData } from '../lib/demoData';
 import { createFormatters, type Formatters } from '../lib/format';
+import { balanceUntil } from '../lib/calculations';
 import { roundMoney } from '../lib/money';
 import {
   createId,
   dedupeBudgets,
+  DEFAULT_SETTINGS,
   loadData,
+  sanitizeAccount,
   sanitizeBudget,
   sanitizeData,
   sanitizeGoal,
@@ -17,6 +20,7 @@ import {
   STORAGE_KEY,
 } from '../lib/storage';
 import type {
+  Account,
   AppData,
   Budget,
   BudgetCategory,
@@ -38,7 +42,8 @@ type Action =
   | { type: 'budget/delete'; id: string }
   | { type: 'goal/upsert'; goal: SavingsGoal }
   | { type: 'goal/delete'; id: string }
-  | { type: 'settings/update'; settings: Settings };
+  | { type: 'settings/update'; settings: Settings }
+  | { type: 'account/update'; account: Account };
 
 function upsert<T extends { id: string }>(items: T[], item: T, prepend = false): T[] {
   const index = items.findIndex((entry) => entry.id === item.id);
@@ -76,6 +81,8 @@ function reducer(state: AppData, action: Action): AppData {
       return { ...state, goals: state.goals.filter((goal) => goal.id !== action.id) };
     case 'settings/update':
       return { ...state, settings: action.settings };
+    case 'account/update':
+      return { ...state, account: action.account };
     default:
       return state;
   }
@@ -83,19 +90,32 @@ function reducer(state: AppData, action: Action): AppData {
 
 type StartupNotice = 'corrupt' | 'unavailable' | { repaired: number } | null;
 
+/** Leerer Zustand vor der Einrichtung: Der Nutzer gibt zuerst seinen Kontostand an. */
+function emptyData(settings: Settings = DEFAULT_SETTINGS): AppData {
+  return { transactions: [], budgets: [], goals: [], settings: { ...settings }, account: { openingBalance: null } };
+}
+
 function initialize(): { data: AppData; notice: StartupNotice } {
   const result = loadData();
   switch (result.status) {
     case 'ok':
       return { data: result.data, notice: result.dropped > 0 ? { repaired: result.dropped } : null };
     case 'empty':
-      // Erster Start: realistische Demo-Daten laden (Standardsprache Deutsch).
-      return { data: createDemoData(todayISO(), 'de'), notice: null };
+      // Erster Start: Einrichtung mit Kontostand-Abfrage wird angezeigt.
+      return { data: emptyData(), notice: null };
     case 'corrupt':
-      return { data: createDemoData(todayISO(), 'de'), notice: 'corrupt' };
+      return { data: emptyData(), notice: 'corrupt' };
     default:
-      return { data: createDemoData(todayISO(), 'de'), notice: 'unavailable' };
+      return { data: emptyData(), notice: 'unavailable' };
   }
+}
+
+export interface OnboardingInput {
+  name: string;
+  currency: Settings['currency'];
+  /** Aktueller Kontostand laut Nutzer */
+  balance: number;
+  withDemo: boolean;
 }
 
 export interface BudgetInput {
@@ -120,6 +140,9 @@ export interface Actions {
   replaceData: (data: AppData) => void;
   resetDemo: () => void;
   clearAll: () => void;
+  completeOnboarding: (input: OnboardingInput) => void;
+  /** Setzt den aktuellen Kontostand; das Startguthaben wird passend berechnet. */
+  setCurrentBalance: (balance: number) => void;
 }
 
 interface I18nValue {
@@ -310,11 +333,28 @@ export function AppProvider({ children }: { children: ReactNode }) {
         if (result) dispatch({ type: 'replace', data: result.data });
       },
       resetDemo: () => {
-        const { settings } = stateRef.current;
-        dispatch({ type: 'replace', data: createDemoData(todayISO(), settings.language, settings) });
+        const { settings, transactions, account } = stateRef.current;
+        // Der angezeigte Kontostand bleibt gleich, nur die Transaktionen werden ersetzt.
+        const currentBalance = balanceUntil(transactions, undefined, account.openingBalance ?? 0);
+        const demo = createDemoData(todayISO(), settings.language, settings);
+        const openingBalance = roundMoney(currentBalance - balanceUntil(demo.transactions));
+        dispatch({ type: 'replace', data: { ...demo, account: { openingBalance } } });
       },
       clearAll: () => {
-        dispatch({ type: 'replace', data: { transactions: [], budgets: [], goals: [], settings: stateRef.current.settings } });
+        dispatch({ type: 'replace', data: emptyData(stateRef.current.settings) });
+      },
+      completeOnboarding: ({ name, currency, balance, withDemo }) => {
+        const state = stateRef.current;
+        const settings = sanitizeSettings({ ...state.settings, currency, name: name.trim() || state.settings.name });
+        const base = withDemo ? createDemoData(todayISO(), settings.language, settings) : state;
+        // Startguthaben so wählen, dass der Kontostand heute genau dem eingegebenen Betrag entspricht.
+        const openingBalance = roundMoney(balance - balanceUntil(base.transactions));
+        dispatch({ type: 'replace', data: { ...base, settings, account: { openingBalance } } });
+      },
+      setCurrentBalance: (balance) => {
+        if (!Number.isFinite(balance)) return;
+        const openingBalance = roundMoney(balance - balanceUntil(stateRef.current.transactions));
+        dispatch({ type: 'account/update', account: sanitizeAccount({ openingBalance }) });
       },
     };
   }, []);

@@ -82,6 +82,24 @@ export function parseAmount(input: string, language: Language): AmountParseResul
   return { ok: true, value: roundMoney(value) };
 }
 
+export type SignedAmountResult = { ok: true; value: number } | { ok: false; error: 'required' | 'invalid' | 'tooLarge' };
+
+/**
+ * Wie `parseAmount`, erlaubt aber auch 0 und negative Werte –
+ * z. B. für einen überzogenen Kontostand („−120,50“).
+ */
+export function parseSignedAmount(input: string, language: Language): SignedAmountResult {
+  const cleaned = input.replace(/[\s\u00a0\u202f']/g, '').replace(/€|\$|£|CHF|EUR|USD|GBP|Fr\.?/gi, '');
+  if (!input.trim()) return { ok: false, error: 'required' };
+  if (!cleaned) return { ok: false, error: 'invalid' };
+  const negative = /^[-−–]/.test(cleaned);
+  const rest = negative || cleaned.startsWith('+') ? cleaned.slice(1) : cleaned;
+  if (/^[0.,]+$/.test(rest) && /0/.test(rest)) return { ok: true, value: 0 };
+  const parsed = parseAmount(rest, language);
+  if (!parsed.ok) return { ok: false, error: parsed.error === 'tooLarge' ? 'tooLarge' : 'invalid' };
+  return { ok: true, value: negative ? -parsed.value : parsed.value };
+}
+
 /** Formatiert einen Betrag für ein Eingabefeld (ohne Tausendertrennzeichen). */
 export function amountToInput(value: number, language: Language): string {
   const fixed = roundMoney(value).toFixed(2);

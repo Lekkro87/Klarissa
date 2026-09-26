@@ -1,6 +1,7 @@
 import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Header } from './components/layout/Header';
 import { MobileDrawer, MobileTabBar, Sidebar } from './components/layout/Navigation';
+import { Onboarding } from './components/onboarding/Onboarding';
 import { TransactionModal } from './components/transactions/TransactionModal';
 import { useConfirm } from './components/ui/ConfirmDialog';
 import { ToastViewport, useToast } from './components/ui/Toast';
@@ -90,9 +91,10 @@ export function App() {
 
   // Seitentitel, Scroll-Position und Fokus beim Seitenwechsel
   const firstRender = useRef(true);
+  const needsSetup = data.account.openingBalance === null;
   useEffect(() => {
-    document.title = `${t.nav[route]} · ${t.app.name}`;
-  }, [route, t]);
+    if (!needsSetup) document.title = `${t.nav[route]} · ${t.app.name}`;
+  }, [route, t, needsSetup]);
   useEffect(() => {
     if (firstRender.current) {
       firstRender.current = false;
@@ -148,6 +150,16 @@ export function App() {
   );
 
   const updateFilters = useCallback((patch: Partial<TxFilters>) => setFilters((current) => ({ ...current, ...patch })), []);
+
+  // Beim ersten Start muss zuerst der Kontostand angegeben werden.
+  if (needsSetup) {
+    return (
+      <>
+        <Onboarding />
+        <ToastViewport />
+      </>
+    );
+  }
 
   let page: ReactNode;
   switch (route) {

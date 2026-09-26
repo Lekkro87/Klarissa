@@ -14,8 +14,8 @@ import {
 } from './calculations';
 import { addMonths, isValidISODate, periodRange, startOfWeek } from './dates';
 import { createDemoData } from './demoData';
-import { parseAmount } from './money';
-import { sanitizeData } from './storage';
+import { parseAmount, parseSignedAmount } from './money';
+import { sanitizeAccount, sanitizeData, sanitizeTransaction } from './storage';
 import { applyFilters, createSearchIndex, DEFAULT_FILTERS } from './transactionFilters';
 
 let counter = 0;
@@ -54,6 +54,20 @@ describe('parseAmount', () => {
   });
 });
 
+describe('parseSignedAmount', () => {
+  it('erlaubt negative Werte und 0 für den Kontostand', () => {
+    expect(parseSignedAmount('2.450,80', 'de')).toEqual({ ok: true, value: 2450.8 });
+    expect(parseSignedAmount('€ 2.450,80', 'de')).toEqual({ ok: true, value: 2450.8 });
+    expect(parseSignedAmount('-120,50', 'de')).toEqual({ ok: true, value: -120.5 });
+    expect(parseSignedAmount('−5', 'de')).toEqual({ ok: true, value: -5 });
+    expect(parseSignedAmount('0', 'de')).toEqual({ ok: true, value: 0 });
+    expect(parseSignedAmount('0,00', 'de')).toEqual({ ok: true, value: 0 });
+    expect(parseSignedAmount('', 'de')).toEqual({ ok: false, error: 'required' });
+    expect(parseSignedAmount('abc', 'de')).toEqual({ ok: false, error: 'invalid' });
+    expect(parseSignedAmount('-', 'de')).toEqual({ ok: false, error: 'invalid' });
+  });
+});
+
 describe('Berechnungen', () => {
   it('summiert centgenau und berechnet Kontostand und Sparquote', () => {
     const list = [
@@ -66,6 +80,7 @@ describe('Berechnungen', () => {
     expect(totals.expense).toBe(0.05);
     expect(totals.net).toBe(0.25);
     expect(balanceUntil(list)).toBe(0.25);
+    expect(balanceUntil(list, undefined, 1000)).toBe(1000.25);
     expect(savingsRate(3000, 1000)).toBeCloseTo(66.667, 2);
     expect(savingsRate(0, 100)).toBeNull();
   });
@@ -86,6 +101,8 @@ describe('Berechnungen', () => {
     expect(series.map((point) => point.key)).toEqual(['2026-08', '2026-09']);
     expect(series[0]).toMatchObject({ income: 1000, expense: 0, balance: 1100 });
     expect(series[1]).toMatchObject({ income: 0, expense: 200, balance: 900 });
+    const withOpening = monthlySeries(list, { year: 2026, month: 9 }, 2, 500);
+    expect(withOpening.map((point) => point.balance)).toEqual([1600, 1400]);
   });
 
   it('gruppiert Ausgaben nach Kategorie', () => {
@@ -187,7 +204,18 @@ describe('Speicher-Validierung', () => {
     expect(result!.data.budgets).toEqual([{ id: 'y', category: 'groceries', amount: 200, month: 9, year: 2026 }]);
     expect(result!.data.goals).toHaveLength(0);
     expect(result!.data.settings).toEqual({ name: 'Max Mustermann', currency: 'EUR', theme: 'dark', language: 'en' });
+    expect(result!.data.account).toEqual({ openingBalance: null });
     expect(result!.dropped).toBe(5);
+  });
+
+  it('prüft Startguthaben und die Kategorie Restaurants', () => {
+    expect(sanitizeAccount({ openingBalance: -120.504 })).toEqual({ openingBalance: -120.5 });
+    expect(sanitizeAccount({ openingBalance: 'abc' })).toEqual({ openingBalance: null });
+    expect(sanitizeAccount(undefined)).toEqual({ openingBalance: null });
+    const restaurant = sanitizeTransaction({ type: 'expense', amount: 24.6, category: 'restaurants', date: '2026-09-20' });
+    expect(restaurant?.category).toBe('restaurants');
+    const wrongType = sanitizeTransaction({ type: 'income', amount: 10, category: 'restaurants', date: '2026-09-20' });
+    expect(wrongType?.category).toBe('otherIncome');
   });
 
   it('erkennt unbrauchbare Daten', () => {
@@ -236,6 +264,8 @@ describe('Demo-Daten', () => {
     expect(data.transactions.length).toBeGreaterThan(100);
     expect(data.transactions.every((item) => isValidISODate(item.date) && item.date <= today)).toBe(true);
     expect(sanitizeData(data)?.dropped).toBe(0);
+    expect(data.transactions.some((item) => item.category === 'restaurants')).toBe(true);
+    expect(data.budgets.some((budget) => budget.category === 'restaurants')).toBe(true);
     const summary = summarizeMonthBudgets(data.budgets, data.transactions, { year: 2026, month: 9 });
     expect(collectWarnings(summary).length).toBeGreaterThan(0);
   });

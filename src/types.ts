@@ -5,6 +5,7 @@ export type IncomeCategory = 'salary' | 'sidejob' | 'freelance' | 'gift' | 'inve
 export type ExpenseCategory =
   | 'housing'
   | 'groceries'
+  | 'restaurants'
   | 'transport'
   | 'leisure'
   | 'shopping'
@@ -74,9 +75,18 @@ export interface Settings {
   language: Language;
 }
 
+export interface Account {
+  /**
+   * Startguthaben, auf das alle Einnahmen und Ausgaben aufgerechnet werden.
+   * `null`, solange der Nutzer seinen Kontostand noch nicht angegeben hat.
+   */
+  openingBalance: number | null;
+}
+
 export interface AppData {
   transactions: Transaction[];
   budgets: Budget[];
   goals: SavingsGoal[];
   settings: Settings;
+  account: Account;
 }

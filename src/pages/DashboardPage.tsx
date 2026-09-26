@@ -75,7 +75,8 @@ export function DashboardPage() {
   const [period, setPeriod] = useState<DashboardPeriod>('month');
   const [chartMonths, setChartMonths] = useState<'6' | '12'>('6');
 
-  const { transactions, budgets, goals, settings } = data;
+  const { transactions, budgets, goals, settings, account } = data;
+  const opening = account.openingBalance ?? 0;
   const ym = ymOf(today);
   const firstName = settings.name.trim().split(/\s+/)[0] || settings.name;
 
@@ -84,8 +85,8 @@ export function DashboardPage() {
     const inPeriod = filterByRange(transactions, ranges.current);
     const current = computeTotals(inPeriod);
     const previous = ranges.previous ? computeTotals(filterByRange(transactions, ranges.previous)) : null;
-    const balance = balanceUntil(transactions);
-    const balancePrevious = balanceUntil(transactions, monthEnd(addMonths(ymOf(today), -1)));
+    const balance = balanceUntil(transactions, undefined, opening);
+    const balancePrevious = balanceUntil(transactions, monthEnd(addMonths(ymOf(today), -1)), opening);
     const rate = savingsRate(current.income, current.expense);
     const previousRate = previous ? savingsRate(previous.income, previous.expense) : null;
     return {
@@ -97,7 +98,7 @@ export function DashboardPage() {
       rateChange: rate !== null && previousRate !== null ? rate - previousRate : null,
       expenseCategories: categoryBreakdown(inPeriod, 'expense'),
     };
-  }, [transactions, period, today]);
+  }, [transactions, period, today, opening]);
 
   const series = useMemo(
     () =>
@@ -114,7 +115,7 @@ export function DashboardPage() {
   );
 
   const trends = useMemo(() => {
-    const year = monthlySeries(transactions, ymOf(today), 12);
+    const year = monthlySeries(transactions, ymOf(today), 12, opening);
     const recent = year.slice(-6);
     const label = (key: string) => f.monthShort(ymOf(`${key}-01`));
     return {
@@ -127,7 +128,7 @@ export function DashboardPage() {
       axisStart: `${label(year[0].key)} ${year[0].key.slice(0, 4)}`,
       axisEnd: `${label(year[year.length - 1].key)} ${year[year.length - 1].key.slice(0, 4)}`,
     };
-  }, [transactions, today, f]);
+  }, [transactions, today, f, opening]);
 
   const monthCompare = useMemo(() => {
     const current = computeTotals(filterByRange(transactions, monthRange(ymOf(today))));

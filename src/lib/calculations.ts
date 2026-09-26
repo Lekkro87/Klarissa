@@ -39,9 +39,12 @@ export function filterByRange(transactions: readonly Transaction[], range: DateR
   return transactions.filter((tx) => isInRange(tx.date, range));
 }
 
-/** Kontostand = Summe aller Einnahmen − Summe aller Ausgaben (optional bis einschließlich `untilISO`). */
-export function balanceUntil(transactions: readonly Transaction[], untilISO?: string): number {
-  let cents = 0;
+/**
+ * Kontostand = Startguthaben + Summe aller Einnahmen − Summe aller Ausgaben
+ * (optional nur bis einschließlich `untilISO`).
+ */
+export function balanceUntil(transactions: readonly Transaction[], untilISO?: string, opening = 0): number {
+  let cents = toCents(opening);
   for (const tx of transactions) {
     if (untilISO !== undefined && tx.date > untilISO) continue;
     cents += tx.type === 'income' ? toCents(tx.amount) : -toCents(tx.amount);
@@ -75,11 +78,12 @@ function buildSeries(
   keys: string[],
   keyOf: (tx: Transaction) => string,
   firstKeyStart: string,
+  opening: number,
 ): SeriesPoint[] {
   const buckets = new Map<string, { income: number; expense: number }>();
   for (const key of keys) buckets.set(key, { income: 0, expense: 0 });
 
-  let openingBalance = 0;
+  let openingBalance = toCents(opening);
   for (const tx of transactions) {
     const cents = toCents(tx.amount);
     if (tx.date < firstKeyStart) {
@@ -107,17 +111,22 @@ function buildSeries(
 }
 
 /** Monatliche Summen für `count` Monate, die mit `end` enden. */
-export function monthlySeries(transactions: readonly Transaction[], end: YearMonth, count: number): SeriesPoint[] {
+export function monthlySeries(
+  transactions: readonly Transaction[],
+  end: YearMonth,
+  count: number,
+  opening = 0,
+): SeriesPoint[] {
   const start = addMonths(end, -(count - 1));
   const keys = Array.from({ length: count }, (_, index) => ymKey(addMonths(start, index)));
-  return buildSeries(transactions, keys, (tx) => tx.date.slice(0, 7), monthStart(start));
+  return buildSeries(transactions, keys, (tx) => tx.date.slice(0, 7), monthStart(start), opening);
 }
 
 /** Tägliche Summen von `from` bis `to` (beide eingeschlossen). */
-export function dailySeries(transactions: readonly Transaction[], from: string, to: string): SeriesPoint[] {
+export function dailySeries(transactions: readonly Transaction[], from: string, to: string, opening = 0): SeriesPoint[] {
   const days = Math.max(1, daysBetweenInclusive(from, to));
   const keys = Array.from({ length: days }, (_, index) => addDays(from, index));
-  return buildSeries(transactions, keys, (tx) => tx.date, from);
+  return buildSeries(transactions, keys, (tx) => tx.date, from, opening);
 }
 
 export interface CategoryShare {
