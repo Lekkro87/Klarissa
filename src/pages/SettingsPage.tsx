@@ -1,27 +1,30 @@
 import {
-  ClipboardCopy,
+  Check,
+  ChevronRight,
   Database,
   Download,
   FileUp,
+  Flag,
+  Globe,
   Info,
   Landmark,
+  type LucideIcon,
   Monitor,
   Moon,
-  Palette,
+  PencilLine,
   RotateCcw,
   Sun,
   Trash2,
   Upload,
   UserRound,
-  Wallet,
 } from 'lucide-react';
-import { type FormEvent, type ReactNode, useEffect, useId, useMemo, useRef, useState } from 'react';
+import { type CSSProperties, type FormEvent, type ReactNode, useEffect, useId, useMemo, useRef, useState } from 'react';
+import { Avatar } from '../components/layout/Navigation';
 import { Button } from '../components/ui/Button';
-import { Card, PageIntro } from '../components/ui/Card';
+import { PageIntro } from '../components/ui/Card';
 import { useConfirm } from '../components/ui/ConfirmDialog';
 import { Field, fieldAria } from '../components/ui/Field';
 import { Modal } from '../components/ui/Modal';
-import { SegmentedControl } from '../components/ui/SegmentedControl';
 import { useToast } from '../components/ui/Toast';
 import { MESSAGES } from '../i18n';
 import { balanceUntil } from '../lib/calculations';
@@ -31,33 +34,68 @@ import { CURRENCIES, NAME_MAX, sanitizeData, serializeData } from '../lib/storag
 import { useActions, useData, useI18n } from '../state/store';
 import type { Currency, Language, ThemePreference } from '../types';
 
-function SettingsSection({
-  icon: Icon,
+/** Symbol wie in der Einstellungen-App: farbiges abgerundetes Quadrat. */
+function SettingsIcon({ icon: Icon, tint }: { icon: LucideIcon; tint: string }) {
+  return (
+    <span className="grid size-[29px] shrink-0 place-items-center rounded-[7px] text-white" style={{ background: tint }} aria-hidden="true">
+      <Icon className="size-[17px]" strokeWidth={2.2} />
+    </span>
+  );
+}
+
+/** Gruppierte Liste mit Überschrift und Fußnote (inset grouped). */
+function SettingsGroup({
   title,
-  text,
+  footer,
+  inset = 16,
   children,
 }: {
-  icon: typeof Wallet;
   title: string;
-  text: string;
+  footer?: ReactNode;
+  inset?: number;
   children: ReactNode;
 }) {
   const id = useId();
   return (
-    <Card aria-labelledby={id}>
-      <div className="mb-5 flex items-start gap-3">
-        <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-primary-soft text-primary-text" aria-hidden="true">
-          <Icon className="size-5" />
-        </span>
-        <div className="min-w-0">
-          <h2 id={id} className="font-display text-base font-semibold text-ink">
-            {title}
-          </h2>
-          <p className="mt-0.5 text-sm text-muted">{text}</p>
-        </div>
+    <section aria-labelledby={id}>
+      <h2 id={id} className="group-header">
+        {title}
+      </h2>
+      <div className="group-list" style={{ '--row-inset': `${inset}px` } as CSSProperties}>
+        {children}
       </div>
-      {children}
-    </Card>
+      {footer && <div className="group-footer">{footer}</div>}
+    </section>
+  );
+}
+
+/** Mini-Vorschau für Hell/Dunkel wie unter „Anzeige & Helligkeit“. */
+function ThemePreview({ mode }: { mode: ThemePreference }) {
+  const pane = (dark: boolean) => (
+    <div className={`flex h-full min-w-0 flex-col gap-1 p-1.5 ${dark ? 'bg-black' : 'bg-[#f2f2f7]'}`}>
+      <div className={`h-1.5 w-7 rounded-full ${dark ? 'bg-[#3a3a3c]' : 'bg-[#d1d1d6]'}`} />
+      <div className={`flex-1 rounded-[5px] p-1.5 ${dark ? 'bg-[#1c1c1e]' : 'bg-white'}`}>
+        <div className="h-1.5 w-3/4 rounded-full bg-[#0a84ff]" />
+        <div className={`mt-1 h-1.5 w-1/2 rounded-full ${dark ? 'bg-[#3a3a3c]' : 'bg-[#e5e5ea]'}`} />
+        <div className={`mt-1 h-1.5 w-2/3 rounded-full ${dark ? 'bg-[#3a3a3c]' : 'bg-[#e5e5ea]'}`} />
+      </div>
+    </div>
+  );
+  return (
+    <div
+      className="grid h-[76px] w-full max-w-[112px] overflow-hidden rounded-[10px] shadow-[0_0_0_0.5px_var(--separator),0_2px_8px_-2px_rgb(0_0_0/0.18)]"
+      style={{ gridTemplateColumns: mode === 'system' ? '1fr 1fr' : '1fr' }}
+      aria-hidden="true"
+    >
+      {mode === 'system' ? (
+        <>
+          {pane(false)}
+          {pane(true)}
+        </>
+      ) : (
+        pane(mode === 'dark')
+      )}
+    </div>
   );
 }
 
@@ -163,182 +201,289 @@ export function SettingsPage() {
     toast.show({ kind: 'success', message: t.toasts.dataCleared });
   };
 
+  const nameChanged = name.trim() !== settings.name;
+
   return (
-    <div className="space-y-6">
+    <div className="mx-auto max-w-[760px] space-y-8">
       <PageIntro title={t.nav.settings} subtitle={t.settings.subtitle} />
 
-      <div className="grid gap-6 xl:grid-cols-2">
-        <SettingsSection icon={UserRound} title={t.settings.profile} text={t.settings.profileText}>
-          <form onSubmit={saveName} noValidate className="flex flex-col gap-3 sm:flex-row sm:items-start">
-            <Field id={`${id}-name`} label={t.settings.name} error={nameError} className="flex-1">
-              <input
-                {...fieldAria(`${id}-name`, nameError)}
-                type="text"
-                className="control"
-                maxLength={NAME_MAX}
-                autoComplete="name"
-                value={name}
-                onChange={(event) => {
-                  setName(event.target.value);
-                  if (nameError) setNameError(null);
-                }}
-              />
-            </Field>
-            <Button type="submit" className="sm:mt-[30px]" disabled={name.trim() === settings.name}>
-              {t.settings.saveName}
-            </Button>
-          </form>
-        </SettingsSection>
-
-        <SettingsSection icon={Landmark} title={t.settings.balance} text={t.settings.balanceText}>
-          <div className="mb-4 grid grid-cols-2 gap-3">
-            <div className="min-w-0 rounded-2xl bg-surface-2 px-4 py-3">
-              <p className="truncate text-[13px] font-semibold text-muted">{t.settings.currentBalance}</p>
-              <p className="num mt-1 truncate font-display text-lg font-semibold tracking-[-0.02em] text-ink">
-                {f.money(currentBalance)}
-              </p>
-            </div>
-            <div className="min-w-0 rounded-2xl bg-surface-2 px-4 py-3">
-              <p className="truncate text-[13px] font-semibold text-muted">{t.settings.openingBalance}</p>
-              <p className="num mt-1 truncate font-display text-lg font-semibold tracking-[-0.02em] text-ink">
-                {f.money(data.account.openingBalance ?? 0)}
-              </p>
-            </div>
-          </div>
-          <form onSubmit={saveBalance} noValidate className="flex flex-col gap-3 sm:flex-row sm:items-start">
-            <Field id={`${id}-balance`} label={t.settings.newBalance} error={balanceError} className="flex-1">
-              <div className="control flex items-center gap-2">
-                <span className="font-semibold text-muted" aria-hidden="true">
-                  {f.currencySymbol}
-                </span>
-                <input
-                  {...fieldAria(`${id}-balance`, balanceError)}
-                  type="text"
-                  inputMode="decimal"
-                  autoComplete="off"
-                  placeholder={amountToInput(currentBalance, language)}
-                  value={balanceInput}
-                  onChange={(event) => {
-                    setBalanceInput(event.target.value.slice(0, 22));
-                    if (balanceError) setBalanceError(null);
-                  }}
-                  className="num h-full w-full min-w-0 bg-transparent font-semibold text-ink outline-none placeholder:text-line-strong"
-                />
-              </div>
-            </Field>
-            <Button type="submit" className="sm:mt-[30px]">
-              {t.settings.saveBalance}
-            </Button>
-          </form>
-        </SettingsSection>
-
-        <SettingsSection icon={Wallet} title={t.settings.currency} text={t.settings.currencyText}>
-          <fieldset>
-            <legend className="sr-only">{t.settings.currency}</legend>
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-              {CURRENCIES.map((currency) => {
-                const selected = currency === settings.currency;
-                return (
-                  <label
-                    key={currency}
-                    className={`relative flex min-w-0 cursor-pointer flex-col rounded-2xl border p-3.5 transition-colors has-[input:focus-visible]:outline-2 has-[input:focus-visible]:outline-offset-2 has-[input:focus-visible]:outline-[var(--focus)] ${
-                      selected ? 'border-primary bg-primary-soft' : 'border-line hover:border-line-strong hover:bg-surface-2'
-                    }`}
-                  >
-                    <input
-                      type="radio"
-                      name={`${id}-currency`}
-                      value={currency}
-                      checked={selected}
-                      onChange={() => changeCurrency(currency)}
-                      className="sr-only"
-                    />
-                    <span className={`font-display text-xl font-semibold ${selected ? 'text-primary-text' : 'text-ink'}`}>
-                      {currencySymbols[currency]}
-                    </span>
-                    <span className="mt-1 text-sm font-semibold text-ink">{currency}</span>
-                    <span className="text-xs leading-snug text-muted">{t.settings.currencies[currency]}</span>
-                  </label>
-                );
-              })}
-            </div>
-          </fieldset>
-        </SettingsSection>
-
-        <SettingsSection icon={Palette} title={t.settings.appearance} text={t.settings.appearanceText}>
-          <div className="space-y-5">
-            <div>
-              <p className="mb-2 text-sm font-semibold text-ink-2">{t.settings.theme}</p>
-              <SegmentedControl
-                label={t.settings.theme}
-                value={settings.theme}
-                onChange={changeTheme}
-                size="md"
-                fullWidth
-                options={[
-                  { value: 'light', label: t.settings.themes.light, icon: Sun },
-                  { value: 'dark', label: t.settings.themes.dark, icon: Moon },
-                  { value: 'system', label: t.settings.themes.system, icon: Monitor },
-                ]}
-              />
-            </div>
-            <div>
-              <p className="mb-2 text-sm font-semibold text-ink-2">{t.settings.language}</p>
-              <SegmentedControl
-                label={t.settings.language}
-                value={settings.language}
-                onChange={changeLanguage}
-                size="md"
-                fullWidth
-                options={[
-                  { value: 'de', label: t.settings.languages.de },
-                  { value: 'en', label: t.settings.languages.en },
-                ]}
-              />
-            </div>
-          </div>
-        </SettingsSection>
-      </div>
-
-      <SettingsSection icon={Database} title={t.settings.data} text={t.settings.dataText}>
-        <p className="num mb-5 rounded-xl bg-surface-2 px-4 py-3 text-sm font-medium text-ink-2">
-          {t.settings.stats(data.transactions.length, data.budgets.length, data.goals.length)}
-        </p>
-        <div className="grid gap-6 lg:grid-cols-2">
-          <div>
-            <h3 className="mb-3 text-sm font-semibold text-ink-2">{t.settings.backupHint}</h3>
-            <div className="flex flex-wrap gap-2">
-              <Button variant="secondary" icon={Download} onClick={() => setExportOpen(true)}>
-                {t.settings.exportData}
-              </Button>
-              <Button variant="secondary" icon={Upload} onClick={() => setImportOpen(true)}>
-                {t.settings.importData}
-              </Button>
-            </div>
-          </div>
-          <div>
-            <h3 className="mb-3 text-sm font-semibold text-ink-2">{t.settings.dangerZone}</h3>
-            <div className="flex flex-col gap-3">
-              <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-line p-3.5">
-                <p className="min-w-0 flex-1 text-sm text-muted">{t.settings.resetDemoText}</p>
-                <Button variant="secondary" size="sm" icon={RotateCcw} onClick={resetDemo}>
-                  {t.settings.resetDemo}
-                </Button>
-              </div>
-              <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-line p-3.5">
-                <p className="min-w-0 flex-1 text-sm text-muted">{t.settings.clearAllText}</p>
-                <Button variant="danger" size="sm" icon={Trash2} onClick={clearAll}>
-                  {t.settings.clearAll}
-                </Button>
-              </div>
-            </div>
+      <div className="group-list">
+        <div className="flex items-center gap-4 p-4">
+          <Avatar name={settings.name} size="lg" />
+          <div className="min-w-0">
+            <p className="truncate text-[22px] font-semibold tracking-[-0.025em] text-ink">{settings.name}</p>
+            <p className="text-[13px] text-muted">
+              {t.app.accountType} · {t.app.localOnly}
+            </p>
           </div>
         </div>
-      </SettingsSection>
+      </div>
 
-      <SettingsSection icon={Info} title={t.settings.about} text={t.settings.aboutText}>
-        <p className="text-sm text-muted">Klarissa 1.0 · {t.app.localOnly}</p>
-      </SettingsSection>
+      <form onSubmit={saveName} noValidate>
+        <SettingsGroup
+          title={t.settings.profile}
+          inset={58}
+          footer={
+            nameError ? (
+              <p id={`${id}-name-error`} className="font-medium text-danger-ink">
+                {nameError}
+              </p>
+            ) : (
+              t.settings.profileText
+            )
+          }
+        >
+          <div className="flex min-h-12 flex-wrap items-center gap-x-3 gap-y-2 px-4 py-2 transition-colors focus-within:bg-fill/60">
+            <SettingsIcon icon={UserRound} tint="#8e8e93" />
+            <label htmlFor={`${id}-name`} className="shrink-0 text-[16px] text-ink">
+              {t.settings.name}
+            </label>
+            <input
+              {...fieldAria(`${id}-name`, nameError)}
+              type="text"
+              className="min-w-[8rem] flex-1 bg-transparent py-1.5 text-right text-[16px] text-ink outline-none placeholder:text-muted focus-visible:outline-none aria-[invalid=true]:text-danger-ink"
+              maxLength={NAME_MAX}
+              autoComplete="name"
+              value={name}
+              onChange={(event) => {
+                setName(event.target.value);
+                if (nameError) setNameError(null);
+              }}
+            />
+            {nameChanged && (
+              <Button type="submit" size="sm" className="animate-fade">
+                {t.settings.saveName}
+              </Button>
+            )}
+          </div>
+        </SettingsGroup>
+      </form>
+
+      <SettingsGroup
+        title={t.settings.balance}
+        inset={58}
+        footer={
+          balanceError ? (
+            <p id={`${id}-balance-error`} className="font-medium text-danger-ink">
+              {balanceError}
+            </p>
+          ) : (
+            t.settings.balanceText
+          )
+        }
+      >
+        <div className="flex min-h-12 items-center gap-3 px-4 py-2">
+          <SettingsIcon icon={Landmark} tint="#007aff" />
+          <span className="min-w-0 flex-1 truncate text-[16px] text-ink">{t.settings.currentBalance}</span>
+          <span className="num text-[16px] font-semibold text-ink">{f.money(currentBalance)}</span>
+        </div>
+        <div className="flex min-h-12 items-center gap-3 px-4 py-2">
+          <SettingsIcon icon={Flag} tint="#5856d6" />
+          <span className="min-w-0 flex-1 truncate text-[16px] text-ink">{t.settings.openingBalance}</span>
+          <span className="num text-[16px] text-muted">{f.money(data.account.openingBalance ?? 0)}</span>
+        </div>
+        <form
+          onSubmit={saveBalance}
+          noValidate
+          className="flex min-h-12 flex-wrap items-center gap-x-3 gap-y-2 px-4 py-2 transition-colors focus-within:bg-fill/60"
+        >
+          <SettingsIcon icon={PencilLine} tint="#34c759" />
+          <label htmlFor={`${id}-balance`} className="shrink-0 text-[16px] text-ink">
+            {t.settings.newBalance}
+          </label>
+          <div className="flex min-w-[8rem] flex-1 items-center justify-end gap-1">
+            <input
+              {...fieldAria(`${id}-balance`, balanceError)}
+              type="text"
+              inputMode="decimal"
+              autoComplete="off"
+              placeholder={amountToInput(currentBalance, language)}
+              value={balanceInput}
+              onChange={(event) => {
+                setBalanceInput(event.target.value.slice(0, 22));
+                if (balanceError) setBalanceError(null);
+              }}
+              className="num w-full min-w-0 bg-transparent py-1.5 text-right text-[16px] text-ink outline-none placeholder:text-muted/70 focus-visible:outline-none aria-[invalid=true]:text-danger-ink"
+            />
+            <span className="text-[16px] text-muted" aria-hidden="true">
+              {f.currencySymbol}
+            </span>
+          </div>
+          <Button type="submit" size="sm" disabled={!balanceInput.trim()}>
+            {t.settings.saveBalance}
+          </Button>
+        </form>
+      </SettingsGroup>
+
+      <fieldset>
+        <legend className="group-header">{t.settings.currency}</legend>
+        <div className="group-list [--row-inset:58px]">
+          {CURRENCIES.map((currency) => {
+            const selected = currency === settings.currency;
+            return (
+              <label
+                key={currency}
+                className="relative flex min-h-12 cursor-pointer items-center gap-3 px-4 py-2 transition-colors hover:bg-fill active:bg-fill-strong has-[input:focus-visible]:bg-fill has-[input:focus-visible]:shadow-[inset_0_0_0_2px_var(--focus)]"
+              >
+                <input
+                  type="radio"
+                  name={`${id}-currency`}
+                  value={currency}
+                  checked={selected}
+                  onChange={() => changeCurrency(currency)}
+                  className="absolute inset-0 z-10 m-0 size-full cursor-pointer appearance-none opacity-0"
+                />
+                <span
+                  className="grid size-[29px] shrink-0 place-items-center rounded-[7px] bg-[#34c759] text-[13px] font-bold text-white"
+                  aria-hidden="true"
+                >
+                  <span className={currencySymbols[currency].length > 1 ? 'text-[9.5px]' : ''}>{currencySymbols[currency]}</span>
+                </span>
+                <span className="min-w-0 flex-1 leading-tight">
+                  <span className="block truncate text-[16px] text-ink">{t.settings.currencies[currency]}</span>
+                  <span className="block text-[13px] text-muted">{currency}</span>
+                </span>
+                {selected && <Check className="size-5 shrink-0 text-primary-text" aria-hidden="true" strokeWidth={2.6} />}
+              </label>
+            );
+          })}
+        </div>
+        <p className="group-footer">{t.settings.currencyText}</p>
+      </fieldset>
+
+      <SettingsGroup title={t.settings.theme} footer={t.settings.themeText}>
+        <fieldset className="px-4 pb-4 pt-3">
+          <legend className="sr-only">{t.settings.theme}</legend>
+          <div className="grid grid-cols-3 gap-3">
+            {(['light', 'dark', 'system'] as const).map((mode) => {
+              const selected = settings.theme === mode;
+              const Icon = mode === 'light' ? Sun : mode === 'dark' ? Moon : Monitor;
+              return (
+                <label
+                  key={mode}
+                  className="group relative flex cursor-pointer flex-col items-center gap-2 rounded-[12px] p-1.5 text-center transition-colors hover:bg-fill has-[input:focus-visible]:bg-fill has-[input:focus-visible]:shadow-[inset_0_0_0_2px_var(--focus)]"
+                >
+                  <input
+                    type="radio"
+                    name={`${id}-theme`}
+                    value={mode}
+                    checked={selected}
+                    onChange={() => changeTheme(mode)}
+                    className="absolute inset-0 z-10 m-0 size-full cursor-pointer appearance-none opacity-0"
+                  />
+                  <ThemePreview mode={mode} />
+                  <span className="flex items-center gap-1 text-[14px] text-ink">
+                    <Icon className="size-3.5 text-muted" aria-hidden="true" />
+                    {t.settings.themes[mode]}
+                  </span>
+                  <span
+                    className={`grid size-[22px] place-items-center rounded-full transition-colors ${
+                      selected ? 'bg-primary text-white' : 'shadow-[inset_0_0_0_1.5px_var(--line-strong)]'
+                    }`}
+                    aria-hidden="true"
+                  >
+                    {selected && <Check className="size-3.5" strokeWidth={3.2} />}
+                  </span>
+                </label>
+              );
+            })}
+          </div>
+        </fieldset>
+      </SettingsGroup>
+
+      <fieldset>
+        <legend className="group-header">{t.settings.language}</legend>
+        <div className="group-list [--row-inset:58px]">
+          {(['de', 'en'] as const).map((code) => {
+            const selected = settings.language === code;
+            return (
+              <label
+                key={code}
+                className="relative flex min-h-12 cursor-pointer items-center gap-3 px-4 py-2 transition-colors hover:bg-fill active:bg-fill-strong has-[input:focus-visible]:bg-fill has-[input:focus-visible]:shadow-[inset_0_0_0_2px_var(--focus)]"
+              >
+                <input
+                  type="radio"
+                  name={`${id}-language`}
+                  value={code}
+                  checked={selected}
+                  onChange={() => changeLanguage(code)}
+                  className="absolute inset-0 z-10 m-0 size-full cursor-pointer appearance-none opacity-0"
+                />
+                <SettingsIcon icon={Globe} tint="#007aff" />
+                <span className="min-w-0 flex-1 truncate text-[16px] text-ink" lang={code}>
+                  {t.settings.languages[code]}
+                </span>
+                {selected && <Check className="size-5 shrink-0 text-primary-text" aria-hidden="true" strokeWidth={2.6} />}
+              </label>
+            );
+          })}
+        </div>
+      </fieldset>
+
+      <SettingsGroup
+        title={t.settings.data}
+        inset={58}
+        footer={t.settings.dataText}
+      >
+        <div className="flex min-h-12 items-center gap-3 px-4 py-2">
+          <SettingsIcon icon={Database} tint="#8e8e93" />
+          <span className="num min-w-0 flex-1 text-[15px] text-ink">
+            {t.settings.stats(data.transactions.length, data.budgets.length, data.goals.length)}
+          </span>
+        </div>
+        <button
+          type="button"
+          onClick={() => setExportOpen(true)}
+          className="flex min-h-12 w-full items-center gap-3 px-4 py-2 text-left transition-colors hover:bg-fill active:bg-fill-strong"
+        >
+          <SettingsIcon icon={Download} tint="#007aff" />
+          <span className="min-w-0 flex-1 truncate text-[16px] text-ink">{t.settings.exportData}</span>
+          <ChevronRight className="size-4 shrink-0 text-muted/60" aria-hidden="true" strokeWidth={2.6} />
+        </button>
+        <button
+          type="button"
+          onClick={() => setImportOpen(true)}
+          className="flex min-h-12 w-full items-center gap-3 px-4 py-2 text-left transition-colors hover:bg-fill active:bg-fill-strong"
+        >
+          <SettingsIcon icon={Upload} tint="#34c759" />
+          <span className="min-w-0 flex-1 truncate text-[16px] text-ink">{t.settings.importData}</span>
+          <ChevronRight className="size-4 shrink-0 text-muted/60" aria-hidden="true" strokeWidth={2.6} />
+        </button>
+      </SettingsGroup>
+
+      <SettingsGroup
+        title={t.settings.dangerZone}
+        footer={
+          <>
+            {t.settings.resetDemoText} {t.settings.clearAllText}
+          </>
+        }
+      >
+        <button
+          type="button"
+          onClick={resetDemo}
+          className="flex min-h-12 w-full items-center gap-2 px-4 py-2 text-left text-[16px] text-primary-text transition-colors hover:bg-fill active:bg-fill-strong"
+        >
+          <RotateCcw className="size-[18px] shrink-0" aria-hidden="true" strokeWidth={2.2} />
+          {t.settings.resetDemo}
+        </button>
+        <button
+          type="button"
+          onClick={clearAll}
+          className="flex min-h-12 w-full items-center gap-2 px-4 py-2 text-left text-[16px] text-danger-ink transition-colors hover:bg-fill active:bg-fill-strong"
+        >
+          <Trash2 className="size-[18px] shrink-0" aria-hidden="true" strokeWidth={2.2} />
+          {t.settings.clearAll}
+        </button>
+      </SettingsGroup>
+
+      <SettingsGroup title={t.settings.about} inset={58} footer={t.settings.aboutText}>
+        <div className="flex min-h-12 items-center gap-3 px-4 py-2">
+          <SettingsIcon icon={Info} tint="#8e8e93" />
+          <span className="min-w-0 flex-1 text-[16px] text-ink">Klarissa</span>
+          <span className="text-[16px] text-muted">1.0</span>
+        </div>
+      </SettingsGroup>
 
       <ExportModal open={exportOpen} onClose={() => setExportOpen(false)} />
       <ImportModal open={importOpen} onClose={() => setImportOpen(false)} />
@@ -380,16 +525,8 @@ function ExportModal({ open, onClose }: { open: boolean; onClose: () => void }) 
       size="lg"
       title={t.settings.exportData}
       description={t.settings.exportText}
-      footer={
-        <>
-          <Button variant="secondary" onClick={onClose}>
-            {t.common.close}
-          </Button>
-          <Button icon={ClipboardCopy} onClick={copy}>
-            {t.settings.copy}
-          </Button>
-        </>
-      }
+      cancelLabel={t.common.close}
+      confirm={{ label: t.settings.copyShort, onClick: copy }}
     >
       <label htmlFor={`${id}-export`} className="sr-only">
         {t.settings.exportData}
@@ -472,16 +609,7 @@ function ImportModal({ open, onClose }: { open: boolean; onClose: () => void }) 
       size="lg"
       title={t.settings.importData}
       description={t.settings.importText}
-      footer={
-        <>
-          <Button variant="secondary" onClick={close}>
-            {t.common.cancel}
-          </Button>
-          <Button type="submit" form={`${id}-form`} icon={Upload}>
-            {t.settings.importSubmit}
-          </Button>
-        </>
-      }
+      confirm={{ label: t.settings.importSubmit, form: `${id}-form` }}
     >
       <form id={`${id}-form`} onSubmit={submit} noValidate className="flex flex-col gap-4 pb-3">
         <div>

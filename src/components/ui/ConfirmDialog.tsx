@@ -1,8 +1,7 @@
-import { TriangleAlert } from 'lucide-react';
-import { createContext, type ReactNode, useCallback, useContext, useMemo, useRef, useState } from 'react';
+import { createContext, type ReactNode, useCallback, useContext, useId, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useI18n } from '../../state/store';
-import { Button } from './Button';
-import { Modal } from './Modal';
+import { useDialogBehavior } from './Modal';
 
 export interface ConfirmOptions {
   title: string;
@@ -16,11 +15,64 @@ type ConfirmFn = (options: ConfirmOptions) => Promise<boolean>;
 
 const ConfirmContext = createContext<ConfirmFn | null>(null);
 
-export function ConfirmProvider({ children }: { children: ReactNode }) {
+/** Hinweis-Dialog im Stil einer iOS-Warnung (zentriert, zwei Tasten). */
+function AlertDialog({ options, onResult }: { options: ConfirmOptions; onResult: (result: boolean) => void }) {
   const { t } = useI18n();
+  const panelRef = useRef<HTMLDivElement>(null);
+  const cancelRef = useRef<HTMLButtonElement>(null);
+  const titleId = useId();
+  const messageId = useId();
+  useDialogBehavior(true, panelRef, () => onResult(false), cancelRef);
+  const danger = (options.tone ?? 'danger') === 'danger';
+
+  return createPortal(
+    <div className="fixed inset-0 z-[80] grid place-items-center p-6">
+      <div className="animate-fade absolute inset-0 bg-[var(--backdrop)]" aria-hidden="true" onMouseDown={() => onResult(false)} />
+      <div
+        ref={panelRef}
+        role="alertdialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+        aria-describedby={messageId}
+        tabIndex={-1}
+        className="animate-pop material relative w-[min(100%,300px)] overflow-hidden rounded-[16px] text-center shadow-pop outline-none"
+      >
+        <div className="px-5 pb-4 pt-5">
+          <h2 id={titleId} className="text-[17px] font-semibold tracking-[-0.02em] text-ink">
+            {options.title}
+          </h2>
+          <div id={messageId} className="mt-1.5 text-[13px] leading-snug text-ink-2">
+            {options.message}
+          </div>
+        </div>
+        <div className="grid grid-cols-2 shadow-[inset_0_0.5px_0_var(--separator)]">
+          <button
+            ref={cancelRef}
+            type="button"
+            onClick={() => onResult(false)}
+            className={`h-11 text-[17px] text-primary-text transition-colors hover:bg-fill active:bg-fill-strong ${danger ? 'font-semibold' : ''}`}
+          >
+            {options.cancelLabel ?? t.common.cancel}
+          </button>
+          <button
+            type="button"
+            onClick={() => onResult(true)}
+            className={`h-11 text-[17px] shadow-[inset_0.5px_0_0_var(--separator)] transition-colors hover:bg-fill active:bg-fill-strong ${
+              danger ? 'text-danger-ink' : 'font-semibold text-primary-text'
+            }`}
+          >
+            {options.confirmLabel ?? t.common.delete}
+          </button>
+        </div>
+      </div>
+    </div>,
+    document.body,
+  );
+}
+
+export function ConfirmProvider({ children }: { children: ReactNode }) {
   const [options, setOptions] = useState<ConfirmOptions | null>(null);
   const resolver = useRef<((value: boolean) => void) | null>(null);
-  const cancelRef = useRef<HTMLButtonElement>(null);
 
   const confirm = useCallback<ConfirmFn>((next) => {
     resolver.current?.(false);
@@ -37,37 +89,11 @@ export function ConfirmProvider({ children }: { children: ReactNode }) {
   };
 
   const value = useMemo(() => confirm, [confirm]);
-  const tone = options?.tone ?? 'danger';
 
   return (
     <ConfirmContext.Provider value={value}>
       {children}
-      <Modal
-        open={options !== null}
-        onClose={() => close(false)}
-        role="alertdialog"
-        size="sm"
-        title={options?.title ?? ''}
-        description={options?.message}
-        initialFocusRef={cancelRef}
-        icon={
-          tone === 'danger' ? (
-            <span className="grid size-10 shrink-0 place-items-center rounded-full bg-danger-soft text-danger-ink">
-              <TriangleAlert className="size-5" aria-hidden="true" />
-            </span>
-          ) : undefined
-        }
-        footer={
-          <>
-            <Button ref={cancelRef} variant="secondary" onClick={() => close(false)}>
-              {options?.cancelLabel ?? t.common.cancel}
-            </Button>
-            <Button variant={tone === 'danger' ? 'danger' : 'primary'} onClick={() => close(true)}>
-              {options?.confirmLabel ?? t.common.delete}
-            </Button>
-          </>
-        }
-      />
+      {options && <AlertDialog options={options} onResult={close} />}
     </ConfirmContext.Provider>
   );
 }

@@ -10,8 +10,8 @@ interface RingProgressProps {
   children?: ReactNode;
 }
 
-/** Kreisförmige Fortschrittsanzeige (z. B. für das Monatsbudget). */
-export function RingProgress({ percent, color, size = 168, thickness = 14, label, valueText, children }: RingProgressProps) {
+/** Ring im Stil der Aktivitätsringe (z. B. für das Monatsbudget). */
+export function RingProgress({ percent, color, size = 176, thickness = 20, label, valueText, children }: RingProgressProps) {
   const safe = Number.isFinite(percent) ? Math.max(0, percent) : 0;
   const clamped = Math.min(100, safe);
   const radius = (size - thickness) / 2;
@@ -34,7 +34,7 @@ export function RingProgress({ percent, color, size = 168, thickness = 14, label
           cy={size / 2}
           r={radius}
           fill="none"
-          stroke={`color-mix(in srgb, ${color} 14%, var(--surface-3))`}
+          stroke={`color-mix(in srgb, ${color} 20%, transparent)`}
           strokeWidth={thickness}
         />
         <circle

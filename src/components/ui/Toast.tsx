@@ -74,11 +74,12 @@ export function useToast(): ToastApi {
 
 const ICONS = { success: CircleCheck, error: CircleAlert, warning: TriangleAlert, info: Info } as const;
 
+/* Farbige Symbolkreise wie in iOS-Mitteilungen */
 const TONES: Record<ToastKind, string> = {
-  success: 'text-income-ink',
-  error: 'text-danger-ink',
-  warning: 'text-warn-ink',
-  info: 'text-primary-text',
+  success: 'bg-income',
+  error: 'bg-danger',
+  warning: 'bg-serious',
+  info: 'bg-primary',
 };
 
 function ToastCard({ toast, dismiss }: { toast: ToastItem; dismiss: (id: number) => void }) {
@@ -96,21 +97,23 @@ function ToastCard({ toast, dismiss }: { toast: ToastItem; dismiss: (id: number)
   return (
     <div
       role={toast.kind === 'error' ? 'alert' : 'status'}
-      className="animate-toast pointer-events-auto flex w-full items-start gap-3 rounded-2xl border border-line bg-surface p-3.5 pr-2 text-sm shadow-pop sm:w-96"
+      className="animate-toast material pointer-events-auto flex w-full items-center gap-3 rounded-[22px] py-2.5 pl-2.5 pr-1.5 text-[15px] shadow-pop sm:w-[400px]"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
       onFocus={() => setPaused(true)}
       onBlur={() => setPaused(false)}
     >
-      <Icon className={`mt-0.5 size-5 shrink-0 ${TONES[toast.kind]}`} aria-hidden="true" />
-      <div className="min-w-0 flex-1 pt-px">
+      <span className={`grid size-9 shrink-0 place-items-center rounded-full text-white ${TONES[toast.kind]}`} aria-hidden="true">
+        <Icon className="size-5" strokeWidth={2.2} />
+      </span>
+      <div className="min-w-0 flex-1 leading-snug">
         {toast.title && <p className="font-semibold text-ink">{toast.title}</p>}
-        <p className="text-ink-2">{toast.message}</p>
+        <p className={toast.title ? 'text-[14px] text-ink-2' : 'text-ink'}>{toast.message}</p>
       </div>
       {toast.action && (
         <button
           type="button"
-          className="shrink-0 rounded-lg px-2.5 py-1.5 text-sm font-semibold text-primary-text hover:bg-primary-soft"
+          className="shrink-0 rounded-full px-3 py-1.5 text-[15px] font-semibold text-primary-text hover:bg-fill"
           onClick={() => {
             toast.action?.onClick();
             onDismiss();
@@ -122,7 +125,7 @@ function ToastCard({ toast, dismiss }: { toast: ToastItem; dismiss: (id: number)
       <button
         type="button"
         onClick={onDismiss}
-        className="grid size-8 shrink-0 place-items-center rounded-lg text-muted hover:bg-surface-3 hover:text-ink"
+        className="grid size-8 shrink-0 place-items-center rounded-full text-muted hover:bg-fill hover:text-ink"
         aria-label={t.toasts.dismiss}
         title={t.toasts.dismiss}
       >
@@ -139,7 +142,7 @@ export function ToastViewport() {
   return (
     <div
       aria-live="polite"
-      className="pointer-events-none fixed inset-x-0 bottom-0 z-[70] flex flex-col items-center gap-2 px-4 pb-[calc(env(safe-area-inset-bottom,0px)+88px)] sm:items-end sm:px-6 sm:pb-6 lg:pb-6"
+      className="pointer-events-none fixed inset-x-0 top-0 z-[70] flex flex-col items-center gap-2 px-3 pt-[calc(env(safe-area-inset-top,0px)+10px)] sm:px-6 sm:pt-4"
     >
       {context.toasts.map((toast) => (
         <ToastCard key={toast.id} toast={toast} dismiss={context.dismiss} />

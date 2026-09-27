@@ -64,9 +64,11 @@ export function TransactionsPage({ filters, onFiltersChange }: TransactionsPageP
         title={t.nav.transactions}
         subtitle={t.transactions.subtitle}
         actions={
-          <Button icon={Plus} onClick={() => ui.openTransaction()}>
-            {t.actions.addTransaction}
-          </Button>
+          <div className="hidden md:block lg:hidden">
+            <Button icon={Plus} onClick={() => ui.openTransaction()}>
+              {t.actions.addTransaction}
+            </Button>
+          </div>
         }
       />
 
@@ -94,7 +96,7 @@ export function TransactionsPage({ filters, onFiltersChange }: TransactionsPageP
             <SummaryTile label={t.common.balance} value={f.money(totals.net)} />
           </div>
 
-          <Card padded={false} className="overflow-clip">
+          <Card padded={false} className="overflow-clip max-md:rounded-none max-md:bg-transparent">
             {filtered.length === 0 ? (
               <EmptyState
                 icon={SearchX}
@@ -126,10 +128,10 @@ export function TransactionsPage({ filters, onFiltersChange }: TransactionsPageP
 
 function SummaryTile({ label, value, tone }: { label: string; value: string; tone?: 'income' | 'expense' }) {
   return (
-    <div className="min-w-0 rounded-2xl border border-line bg-surface px-4 py-3">
-      <p className="truncate text-[13px] font-medium text-muted">{label}</p>
+    <div className="min-w-0 rounded-[16px] bg-surface px-4 py-3">
+      <p className="truncate text-[13px] text-muted">{label}</p>
       <p
-        className={`num mt-0.5 truncate font-display text-lg font-semibold tracking-[-0.02em] ${
+        className={`num mt-0.5 truncate font-display text-[20px] font-semibold tracking-[-0.02em] ${
           tone === 'income' ? 'text-income-ink' : tone === 'expense' ? 'text-expense-ink' : 'text-ink'
         }`}
       >

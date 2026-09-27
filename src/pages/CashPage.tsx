@@ -1,6 +1,6 @@
-import { Banknote, Coins, List, Minus, Plus, RotateCcw, WalletMinimal } from 'lucide-react';
+import { Banknote, Coins, Info, List, Minus, Plus, RotateCcw, WalletMinimal } from 'lucide-react';
 import { useMemo, useState } from 'react';
-import { Button, IconButton } from '../components/ui/Button';
+import { Button } from '../components/ui/Button';
 import { Card, CardHeader, PageIntro } from '../components/ui/Card';
 import { useConfirm } from '../components/ui/ConfirmDialog';
 import { useToast } from '../components/ui/Toast';
@@ -19,7 +19,7 @@ function NoteVisual({ label, index, total }: { label: string; index: number; tot
   return (
     <span
       aria-hidden="true"
-      className="relative grid h-10 w-16 shrink-0 place-items-center overflow-hidden rounded-lg text-[12px] font-bold text-white shadow-[0_2px_6px_-2px_rgb(0_0_0/0.35)]"
+      className="relative grid h-10 w-16 shrink-0 place-items-center overflow-hidden rounded-[7px] text-[12px] font-bold text-white shadow-[0_1px_3px_rgb(0_0_0/0.25)]"
       style={{ background: `linear-gradient(135deg, color-mix(in srgb, ${color} 80%, white) 0%, ${color} 70%)` }}
     >
       <span className="absolute inset-[3px] rounded-[5px] border border-white/35" />
@@ -61,31 +61,28 @@ function DenominationRow({ item, index, total }: { item: Denomination; index: nu
   const set = (next: number) => actions.setCashCount(item.key, Math.min(MAX_PIECES, Math.max(0, next)));
 
   return (
-    <li
-      className={`flex flex-wrap items-center gap-x-3 gap-y-2 rounded-2xl border p-3 transition-colors ${
-        count > 0 ? 'border-line bg-surface' : 'border-line/70 bg-surface-2/60'
-      }`}
-    >
+    <li className="flex flex-wrap items-center gap-x-3 gap-y-2 px-4 py-2.5">
       {item.kind === 'note' ? (
         <NoteVisual label={label} index={index} total={total} />
       ) : (
         <CoinVisual label={label} cents={item.cents} />
       )}
       <div className="min-w-0 flex-1 basis-16">
-        <p className="truncate font-display text-[15px] font-semibold text-ink">{label}</p>
-        <p className="num truncate text-[12.5px] text-muted">
-          {count > 0 ? `${count} × ${label} = ${f.money((count * item.cents) / 100)}` : t.cash.none}
+        <p className={`truncate text-[16px] ${count > 0 ? 'text-ink' : 'text-muted'}`}>{label}</p>
+        <p className="num truncate text-[13px] text-muted">
+          {count > 0 ? (
+            <>
+              <span className="hidden min-[400px]:inline">
+                {count} × {label} ={' '}
+              </span>
+              {f.money((count * item.cents) / 100)}
+            </>
+          ) : (
+            t.cash.none
+          )}
         </p>
       </div>
-      <div className="ml-auto flex shrink-0 items-center gap-1">
-        <IconButton
-          icon={Minus}
-          size="sm"
-          variant="outline"
-          label={t.cash.decrease(label)}
-          disabled={count === 0}
-          onClick={() => set(count - 1)}
-        />
+      <div className="ml-auto flex shrink-0 items-center gap-2">
         <input
           type="text"
           inputMode="numeric"
@@ -101,9 +98,33 @@ function DenominationRow({ item, index, total }: { item: Denomination; index: nu
             if (draft === '') set(0);
             setDraft(null);
           }}
-          className="num h-9 w-12 rounded-[10px] border border-line bg-surface text-center text-[15px] font-semibold text-ink outline-none focus:border-primary focus:shadow-[0_0_0_3px_color-mix(in_srgb,var(--primary)_22%,transparent)]"
+          className={`num h-8 w-12 rounded-[8px] bg-transparent text-center text-[17px] outline-none transition-colors hover:bg-fill focus:bg-fill focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus)] ${
+            count > 0 ? 'font-semibold text-ink' : 'text-muted'
+          }`}
         />
-        <IconButton icon={Plus} size="sm" variant="outline" label={t.cash.increase(label)} onClick={() => set(count + 1)} />
+        {/* Stepper wie in iOS: grau gefüllt, zwei Hälften mit Trennlinie */}
+        <div className="flex h-8 items-center rounded-[9px] bg-fill">
+          <button
+            type="button"
+            aria-label={t.cash.decrease(label)}
+            title={t.cash.decrease(label)}
+            disabled={count === 0}
+            onClick={() => set(count - 1)}
+            className="grid h-full w-11 place-items-center rounded-l-[9px] text-ink transition-colors hover:bg-fill active:bg-fill-strong disabled:text-muted/50"
+          >
+            <Minus className="size-4" aria-hidden="true" strokeWidth={2.4} />
+          </button>
+          <span className="h-[18px] w-px bg-[var(--separator)]" aria-hidden="true" />
+          <button
+            type="button"
+            aria-label={t.cash.increase(label)}
+            title={t.cash.increase(label)}
+            onClick={() => set(count + 1)}
+            className="grid h-full w-11 place-items-center rounded-r-[9px] text-ink transition-colors hover:bg-fill active:bg-fill-strong"
+          >
+            <Plus className="size-4" aria-hidden="true" strokeWidth={2.4} />
+          </button>
+        </div>
       </div>
     </li>
   );
@@ -164,45 +185,37 @@ export function CashPage() {
 
       <div className="grid gap-4 xl:grid-cols-12">
         <section className="cash-card flex min-h-[250px] flex-col p-6 sm:p-7 xl:col-span-5" aria-labelledby="cash-total-title">
-          <div className="relative flex items-start justify-between gap-4">
-            <div className="min-w-0">
-              <h2 id="cash-total-title" className="text-sm font-medium text-white/75">
-                {t.cash.total}
-              </h2>
-              <p className="mt-3 truncate font-display text-[40px] font-semibold leading-none tracking-[-0.045em] text-white sm:text-[48px]">
-                {f.money(summary.total)}
-              </p>
-            </div>
-            <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-white/10 text-white ring-1 ring-white/15" aria-hidden="true">
-              <WalletMinimal className="size-5" />
-            </span>
+          <div className="relative flex items-center justify-between gap-4">
+            <h2 id="cash-total-title" className="flex items-center gap-2 text-[17px] font-semibold tracking-[-0.02em] text-white">
+              <WalletMinimal className="size-5" aria-hidden="true" strokeWidth={2.2} />
+              {t.cash.total}
+            </h2>
+            <span className="rounded-full bg-white/15 px-2.5 py-1 text-[12px] font-semibold text-white">{t.cash.separate}</span>
           </div>
-          <div className="relative mt-4 flex flex-wrap items-center gap-2 text-[13px] text-white/75">
-            <span className="rounded-full bg-white/12 px-2.5 py-1 text-xs font-semibold text-white ring-1 ring-white/15">
-              {t.cash.separate}
-            </span>
-            <span>{updatedText}</span>
-          </div>
+          <p className="num relative mt-6 truncate font-display text-[42px] font-semibold leading-none tracking-[-0.035em] text-white sm:text-[48px]">
+            {f.money(summary.total)}
+          </p>
+          <p className="relative mt-2.5 text-[13px] text-white/65">{updatedText}</p>
           <div className="relative mt-auto pt-7">
             <div
-              className="flex h-2.5 w-full gap-[3px] overflow-hidden rounded-full bg-white/10"
+              className="flex h-2 w-full gap-[3px] overflow-hidden rounded-full bg-white/12"
               role="img"
               aria-label={`${t.cash.split}: ${t.cash.notes} ${f.money(summary.notesTotal)}, ${t.cash.coins} ${f.money(summary.coinsTotal)}`}
             >
               {summary.total > 0 && (
                 <>
-                  <span className="h-full rounded-full bg-[#86efc4] transition-[width] duration-500" style={{ width: `${notesShare}%` }} />
-                  <span className="h-full flex-1 rounded-full bg-[#fcd98a]" />
+                  <span className="h-full rounded-full bg-[#30d158] transition-[width] duration-500" style={{ width: `${notesShare}%` }} />
+                  <span className="h-full flex-1 rounded-full bg-[#ffd60a]" />
                 </>
               )}
             </div>
-            <div className="mt-3 flex flex-wrap justify-between gap-x-4 gap-y-1 text-[13px] text-white/80">
+            <div className="mt-3 flex flex-wrap justify-between gap-x-4 gap-y-1 text-[13px] text-white/75">
               <span className="flex items-center gap-2">
-                <span className="size-2.5 rounded-full bg-[#86efc4]" aria-hidden="true" />
+                <span className="size-2 rounded-full bg-[#30d158]" aria-hidden="true" />
                 {t.cash.notes}: <strong className="num font-semibold text-white">{f.money(summary.notesTotal)}</strong>
               </span>
               <span className="flex items-center gap-2">
-                <span className="size-2.5 rounded-full bg-[#fcd98a]" aria-hidden="true" />
+                <span className="size-2 rounded-full bg-[#ffd60a]" aria-hidden="true" />
                 {t.cash.coins}: <strong className="num font-semibold text-white">{f.money(summary.coinsTotal)}</strong>
               </span>
             </div>
@@ -212,24 +225,24 @@ export function CashPage() {
         <Card className="xl:col-span-7">
           <CardHeader title={t.cash.monthTitle} subtitle={f.monthYear(ymOf(today))} />
           <div className="grid gap-3 sm:grid-cols-2">
-            <div className="rounded-2xl bg-surface-2 px-4 py-3.5">
-              <p className="text-[13px] font-semibold text-muted">{t.cash.spentCash}</p>
+            <div className="rounded-[14px] bg-surface-2 px-4 py-3.5">
+              <p className="text-[13px] text-muted">{t.cash.spentCash}</p>
               <p className="num mt-1 font-display text-[24px] font-semibold tracking-[-0.03em] text-expense-ink">
                 {f.signedMoney(month.spent, 'expense')}
               </p>
             </div>
-            <div className="rounded-2xl bg-surface-2 px-4 py-3.5">
-              <p className="text-[13px] font-semibold text-muted">{t.cash.receivedCash}</p>
+            <div className="rounded-[14px] bg-surface-2 px-4 py-3.5">
+              <p className="text-[13px] text-muted">{t.cash.receivedCash}</p>
               <p className="num mt-1 font-display text-[24px] font-semibold tracking-[-0.03em] text-income-ink">
                 {f.signedMoney(month.received, 'income')}
               </p>
             </div>
           </div>
-          <p className="mt-4 text-sm text-muted">{t.cash.monthText}</p>
+          <p className="mt-4 text-[13px] text-muted">{t.cash.monthText}</p>
           <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
-            <span className="text-sm font-medium text-ink-2">{t.cash.transactionsCount(month.count)}</span>
+            <span className="text-[14px] font-medium text-ink-2">{t.cash.transactionsCount(month.count)}</span>
             <Button
-              variant="soft"
+              variant="secondary"
               size="sm"
               icon={List}
               onClick={() => ui.showTransactions({ paymentMethod: 'cash', period: 'month' })}
@@ -240,33 +253,40 @@ export function CashPage() {
         </Card>
       </div>
 
-      <p className="rounded-2xl border border-dashed border-line-strong px-4 py-3 text-sm text-muted">{t.cash.tip}</p>
+      <p className="flex items-start gap-2 px-4 text-[13px] text-muted">
+        <Info className="mt-0.5 size-4 shrink-0 text-primary-text" aria-hidden="true" />
+        {t.cash.tip}
+      </p>
 
-      <div className="grid gap-6 xl:grid-cols-2">
-        <Card>
-          <CardHeader
-            title={t.cash.notes}
-            subtitle={t.cash.summary(summary.notesCount, f.money(summary.notesTotal))}
-            actions={<Banknote className="size-5 text-muted" aria-hidden="true" />}
-          />
-          <ul className="grid gap-2.5 sm:grid-cols-2 xl:grid-cols-1 2xl:grid-cols-2">
+      <div className="grid items-start gap-6 xl:grid-cols-2">
+        <section aria-labelledby="cash-notes-title">
+          <div className="mb-1.5 flex items-end justify-between gap-3 px-4">
+            <h2 id="cash-notes-title" className="flex items-center gap-1.5 text-[13px] uppercase tracking-[0.02em] text-muted">
+              <Banknote className="size-4" aria-hidden="true" />
+              {t.cash.notes}
+            </h2>
+            <p className="num text-[13px] text-muted">{t.cash.summary(summary.notesCount, f.money(summary.notesTotal))}</p>
+          </div>
+          <ul className="group-list inset-rows [--row-inset:92px]">
             {notes.map((item, index) => (
               <DenominationRow key={item.key} item={item} index={index} total={notes.length} />
             ))}
           </ul>
-        </Card>
-        <Card>
-          <CardHeader
-            title={t.cash.coins}
-            subtitle={t.cash.summary(summary.coinsCount, f.money(summary.coinsTotal))}
-            actions={<Coins className="size-5 text-muted" aria-hidden="true" />}
-          />
-          <ul className="grid gap-2.5 sm:grid-cols-2 xl:grid-cols-1 2xl:grid-cols-2">
+        </section>
+        <section aria-labelledby="cash-coins-title">
+          <div className="mb-1.5 flex items-end justify-between gap-3 px-4">
+            <h2 id="cash-coins-title" className="flex items-center gap-1.5 text-[13px] uppercase tracking-[0.02em] text-muted">
+              <Coins className="size-4" aria-hidden="true" />
+              {t.cash.coins}
+            </h2>
+            <p className="num text-[13px] text-muted">{t.cash.summary(summary.coinsCount, f.money(summary.coinsTotal))}</p>
+          </div>
+          <ul className="group-list inset-rows [--row-inset:68px]">
             {coins.map((item, index) => (
               <DenominationRow key={item.key} item={item} index={index} total={coins.length} />
             ))}
           </ul>
-        </Card>
+        </section>
       </div>
     </div>
   );

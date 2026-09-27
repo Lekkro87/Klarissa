@@ -103,20 +103,20 @@ export function GoalsPage() {
           <Card>
             <div className="grid gap-5 md:grid-cols-[1fr_1fr_1.4fr] md:items-center">
               <div>
-                <p className="text-[13px] font-semibold text-muted">{t.goals.totalSaved}</p>
+                <p className="text-[13px] text-muted">{t.goals.totalSaved}</p>
                 <p className="num mt-1 font-display text-[28px] font-semibold tracking-[-0.03em] text-ink">{f.money(summary.saved)}</p>
               </div>
               <div>
-                <p className="text-[13px] font-semibold text-muted">{t.goals.totalTarget}</p>
+                <p className="text-[13px] text-muted">{t.goals.totalTarget}</p>
                 <p className="num mt-1 font-display text-[28px] font-semibold tracking-[-0.03em] text-ink">{f.money(summary.target)}</p>
               </div>
               <div className="space-y-2">
-                <div className="flex items-center justify-between gap-3 text-sm">
-                  <span className="inline-flex items-center gap-1.5 font-semibold text-ink-2">
-                    <Trophy className="size-4 text-muted" aria-hidden="true" />
+                <div className="flex items-center justify-between gap-3 text-[14px]">
+                  <span className="inline-flex items-center gap-1.5 font-medium text-ink-2">
+                    <Trophy className="size-4 text-serious" aria-hidden="true" />
                     {t.goals.goalsReached(summary.reached, goals.length)}
                   </span>
-                  <span className="num font-bold text-ink">{f.percent(summary.progress, 0)}</span>
+                  <span className="num font-semibold text-ink">{f.percent(summary.progress, 0)}</span>
                 </div>
                 <ProgressBar
                   percent={summary.progress}

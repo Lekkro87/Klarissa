@@ -18,8 +18,8 @@ export function StatusPill({ level }: { level: BudgetLevel }) {
   const { t } = useI18n();
   const Icon = level === 'ok' ? CircleCheck : level === 'warn75' || level === 'warn90' ? TriangleAlert : CircleAlert;
   return (
-    <span className={`inline-flex items-center gap-1 whitespace-nowrap rounded-full px-2 py-0.5 text-xs font-semibold ${STATUS_STYLES[level]}`}>
-      <Icon className="size-3.5" aria-hidden="true" />
+    <span className={`inline-flex items-center gap-1 whitespace-nowrap rounded-full px-2 py-0.5 text-[12px] font-semibold ${STATUS_STYLES[level]}`}>
+      <Icon className="size-3.5" aria-hidden="true" strokeWidth={2.4} />
       {t.budget.status[level]}
     </span>
   );
@@ -33,12 +33,12 @@ export function BudgetRow({ status }: { status: BudgetStatus }) {
   return (
     <li className="space-y-2">
       <div className="flex items-center gap-3">
-        <span className="grid size-8 shrink-0 place-items-center rounded-lg bg-surface-3 text-ink-2" aria-hidden="true">
+        <span className="grid size-8 shrink-0 place-items-center rounded-full bg-fill text-ink-2" aria-hidden="true">
           <Icon className="size-4" />
         </span>
-        <span className="min-w-0 flex-1 truncate font-semibold text-ink">{label}</span>
+        <span className="min-w-0 flex-1 truncate text-[15px] font-medium text-ink">{label}</span>
         <span
-          className={`num text-sm font-bold ${
+          className={`num text-[14px] font-semibold ${
             status.level === 'ok' ? 'text-ink' : status.level === 'warn75' ? 'text-warn-ink' : status.level === 'warn90' ? 'text-serious-ink' : 'text-danger-ink'
           }`}
         >
@@ -74,14 +74,14 @@ export function BudgetCard({ status, onEdit, onDelete }: BudgetCardProps) {
   const exceeded = status.remaining < 0;
 
   return (
-    <li className="card flex min-w-0 flex-col gap-4 p-5 transition-shadow duration-200 hover:shadow-hover">
-      <div className="flex items-start gap-3">
-        <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-surface-3 text-ink-2" aria-hidden="true">
-          <Icon className="size-5" />
+    <li className="card flex min-w-0 flex-col gap-4 p-4 sm:p-5">
+      <div className="flex items-center gap-3">
+        <span className="grid size-10 shrink-0 place-items-center rounded-full bg-fill text-ink-2" aria-hidden="true">
+          <Icon className="size-[19px]" />
         </span>
         <div className="min-w-0 flex-1">
-          <h3 className="truncate font-display font-semibold text-ink">{label}</h3>
-          <p className="num text-sm text-muted">{f.money(status.budget.amount)}</p>
+          <h3 className="truncate text-[17px] font-semibold tracking-[-0.02em] text-ink">{label}</h3>
+          <p className="num text-[13px] text-muted">{f.money(status.budget.amount)}</p>
         </div>
         <div className="-mr-2 -mt-1 flex">
           <IconButton icon={Pencil} size="sm" tone="primary" label={`${t.budget.editBudget}: ${label}`} onClick={onEdit} />
@@ -91,9 +91,9 @@ export function BudgetCard({ status, onEdit, onDelete }: BudgetCardProps) {
 
       <div className="space-y-2">
         <div className="flex items-end justify-between gap-2">
-          <p className="num font-display text-xl font-semibold tracking-[-0.02em] text-ink">
+          <p className="num font-display text-[22px] font-semibold tracking-[-0.03em] text-ink">
             {f.money(status.spent)}
-            <span className="ml-1 font-sans text-sm font-medium text-muted">{t.budget.spentOf}</span>
+            <span className="ml-1 font-sans text-[13px] font-normal tracking-normal text-muted">{t.budget.spentOf}</span>
           </p>
           <StatusPill level={status.level} />
         </div>
@@ -114,7 +114,7 @@ export function BudgetCard({ status, onEdit, onDelete }: BudgetCardProps) {
 
       {status.level !== 'ok' && (
         <p
-          className={`rounded-xl px-3 py-2 text-[13px] ${
+          className={`rounded-[12px] px-3 py-2 text-[13px] ${
             status.level === 'warn75' ? 'bg-warn-soft text-warn-ink' : status.level === 'warn90' ? 'bg-serious-soft text-serious-ink' : 'bg-danger-soft text-danger-ink'
           }`}
         >

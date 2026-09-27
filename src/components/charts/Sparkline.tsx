@@ -8,8 +8,6 @@ interface SparklineProps {
   label: string;
   /** Höhe in Pixeln oder `fill`, um den Elterncontainer auszufüllen */
   height?: number | 'fill';
-  /** Helle Darstellung für dunkle Flächen (z. B. Kontostand-Karte) */
-  inverse?: boolean;
 }
 
 const WIDTH = 100;
@@ -33,8 +31,8 @@ function smoothPath(points: [number, number][]): string {
   return d;
 }
 
-/** Kleine Verlaufskurve mit Hover-Anzeige – ohne Achsen, für Kennzahlen-Karten. */
-export function Sparkline({ values, labels, color, format, label, height: heightProp = 56, inverse = false }: SparklineProps) {
+/** Kleine Verlaufskurve wie in der Aktien-App – ohne Achsen, mit Hover-Anzeige. */
+export function Sparkline({ values, labels, color, format, label, height: heightProp = 56 }: SparklineProps) {
   const gradientId = useId().replace(/:/g, '');
   const [hover, setHover] = useState<number | null>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
@@ -93,7 +91,7 @@ export function Sparkline({ values, labels, color, format, label, height: height
       <svg viewBox={`0 0 ${WIDTH} ${height}`} preserveAspectRatio="none" className="absolute inset-0 size-full overflow-visible" aria-hidden="true">
         <defs>
           <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor={color} stopOpacity={inverse ? 0.35 : 0.22} />
+            <stop offset="0%" stopColor={color} stopOpacity={0.24} />
             <stop offset="100%" stopColor={color} stopOpacity={0} />
           </linearGradient>
         </defs>
@@ -112,7 +110,7 @@ export function Sparkline({ values, labels, color, format, label, height: height
         <span
           aria-hidden="true"
           className="pointer-events-none absolute inset-y-0 w-px"
-          style={{ left: `${x}%`, background: inverse ? 'rgb(255 255 255 / 0.3)' : 'var(--line-strong)' }}
+          style={{ left: `${x}%`, background: 'var(--line-strong)' }}
         />
       )}
       <span
@@ -122,15 +120,13 @@ export function Sparkline({ values, labels, color, format, label, height: height
           left: `${x}%`,
           top: y,
           background: color,
-          boxShadow: `0 0 0 2px ${inverse ? 'var(--hero-from)' : 'var(--surface)'}`,
+          boxShadow: '0 0 0 2px var(--surface)',
         }}
       />
       {hover !== null && (
         <span
           aria-hidden="true"
-          className={`num pointer-events-none absolute -top-2 z-10 -translate-y-full whitespace-nowrap rounded-lg px-2 py-1 text-[11px] font-semibold shadow-pop ${
-            inverse ? 'bg-white text-[#12131a]' : 'border border-line bg-surface text-ink'
-          }`}
+          className="num pointer-events-none absolute -top-2 z-10 -translate-y-full whitespace-nowrap rounded-[8px] bg-surface px-2 py-1 text-[11px] font-semibold text-ink shadow-pop ring-[0.5px] ring-[var(--separator)]"
           style={{ left: `clamp(0px, calc(${x}% - 48px), calc(100% - 96px))` }}
         >
           {labels[hover]} · {format(values[hover])}

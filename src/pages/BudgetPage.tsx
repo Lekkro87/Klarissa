@@ -1,4 +1,16 @@
-import { CalendarRange, ChevronLeft, ChevronRight, CircleCheck, Copy, Pencil, Plus, Trash2, TriangleAlert, Wallet } from 'lucide-react';
+import {
+  CalendarRange,
+  ChevronLeft,
+  ChevronRight,
+  CircleAlert,
+  CircleCheck,
+  Copy,
+  Pencil,
+  Plus,
+  Trash2,
+  TriangleAlert,
+  Wallet,
+} from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { BudgetCard, StatusPill } from '../components/budget/BudgetBits';
 import { type BudgetModalMode, BudgetModal } from '../components/budget/BudgetModal';
@@ -93,35 +105,36 @@ export function BudgetPage() {
       />
 
       <div
-        className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-line bg-surface p-2 pl-4"
+        className="flex flex-wrap items-center justify-between gap-3 rounded-[16px] bg-surface py-2 pl-4 pr-2"
         role="group"
         aria-label={t.budget.monthNav}
       >
         <div className="flex items-center gap-2.5">
-          <CalendarRange className="size-5 text-muted" aria-hidden="true" />
-          <p className="font-display text-[17px] font-semibold text-ink" aria-live="polite">
+          <CalendarRange className="size-5 text-primary-text" aria-hidden="true" strokeWidth={2.2} />
+          <p className="text-[17px] font-semibold tracking-[-0.02em] text-ink" aria-live="polite">
             {f.monthYear(ym)}
           </p>
         </div>
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1.5">
           {!isCurrentMonth && (
             <Button variant="ghost" size="sm" onClick={() => setYm(currentYm)}>
               {t.budget.currentMonth}
             </Button>
           )}
-          <IconButton icon={ChevronLeft} label={t.budget.previousMonth} onClick={() => setYm(addMonths(ym, -1))} />
-          <IconButton icon={ChevronRight} label={t.budget.nextMonth} onClick={() => setYm(addMonths(ym, 1))} />
+          <IconButton
+            icon={ChevronLeft}
+            label={t.budget.previousMonth}
+            variant="outline"
+            tone="primary"
+            onClick={() => setYm(addMonths(ym, -1))}
+          />
+          <IconButton icon={ChevronRight} label={t.budget.nextMonth} variant="outline" tone="primary" onClick={() => setYm(addMonths(ym, 1))} />
         </div>
       </div>
 
       <div className="grid gap-6 xl:grid-cols-5">
-        <Card className="relative overflow-hidden xl:col-span-3">
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute -right-24 -top-24 size-72 rounded-full opacity-50 blur-3xl"
-            style={{ background: `color-mix(in srgb, ${monthColor} 16%, transparent)` }}
-          />
-          <div className="relative">
+        <Card className="xl:col-span-3">
+          <div>
             <CardHeader
               title={t.budget.monthlyBudget}
               subtitle={f.monthYear(ym)}
@@ -167,24 +180,24 @@ export function BudgetPage() {
                       <p className="num font-display text-[30px] font-semibold leading-none tracking-[-0.04em] text-ink">
                         {f.percent(summary.percent, 0)}
                       </p>
-                      <p className="mt-1.5 text-xs font-medium text-muted">{t.budget.spentOf}</p>
+                      <p className="mt-1.5 text-[12px] font-medium text-muted">{t.budget.spentOf}</p>
                     </div>
                   </RingProgress>
                   <dl className="grid w-full flex-1 grid-cols-1 gap-4 min-[420px]:grid-cols-3 sm:grid-cols-1 md:grid-cols-3 xl:grid-cols-1 2xl:grid-cols-3">
-                    <div className="rounded-2xl bg-surface-2 px-4 py-3">
-                      <dt className="text-[13px] font-semibold text-muted">{t.budget.monthlyBudget}</dt>
+                    <div className="rounded-[14px] bg-surface-2 px-4 py-3">
+                      <dt className="text-[13px] text-muted">{t.budget.monthlyBudget}</dt>
                       <dd className="num mt-1 truncate font-display text-[22px] font-semibold tracking-[-0.03em] text-ink">
                         {f.money(summary.amount)}
                       </dd>
                     </div>
-                    <div className="rounded-2xl bg-surface-2 px-4 py-3">
-                      <dt className="text-[13px] font-semibold text-muted">{t.budget.spent}</dt>
+                    <div className="rounded-[14px] bg-surface-2 px-4 py-3">
+                      <dt className="text-[13px] text-muted">{t.budget.spent}</dt>
                       <dd className="num mt-1 truncate font-display text-[22px] font-semibold tracking-[-0.03em] text-ink">
                         {f.money(summary.spent)}
                       </dd>
                     </div>
-                    <div className="rounded-2xl bg-surface-2 px-4 py-3">
-                      <dt className="text-[13px] font-semibold text-muted">
+                    <div className="rounded-[14px] bg-surface-2 px-4 py-3">
+                      <dt className="text-[13px] text-muted">
                         {summary.remaining >= 0 ? t.budget.remaining : t.budget.exceededBy}
                       </dt>
                       <dd
@@ -197,7 +210,7 @@ export function BudgetPage() {
                     </div>
                   </dl>
                 </div>
-                <div className="mt-6 space-y-1 border-t border-line pt-4 text-[13px] text-muted">
+                <div className="-mx-5 mt-6 space-y-1 px-5 pt-4 text-[13px] text-muted shadow-[inset_0_0.5px_0_var(--separator)] sm:-mx-6 sm:px-6">
                   {perDay !== null && <p className="font-semibold text-ink-2">{t.budget.perDay(f.money(perDay), daysLeft)}</p>}
                   <p>{summary.isDerived ? t.budget.derivedHint : t.budget.explicitHint}</p>
                   {summary.unbudgetedSpent > 0 && <p>{t.budget.unbudgetedShare(f.money(summary.unbudgetedSpent))}</p>}
@@ -229,26 +242,31 @@ export function BudgetPage() {
         <Card className="xl:col-span-2">
           <CardHeader title={t.budget.warningsTitle} />
           {warnings.length === 0 ? (
-            <div className="flex items-start gap-3 rounded-2xl bg-income-soft p-4 text-income-ink">
-              <CircleCheck className="mt-0.5 size-5 shrink-0" aria-hidden="true" />
+            <div className="flex items-center gap-3 py-1">
+              <span className="grid size-9 shrink-0 place-items-center rounded-full bg-income text-white" aria-hidden="true">
+                <CircleCheck className="size-5" strokeWidth={2.4} />
+              </span>
               <div>
-                <p className="font-semibold">{t.header.noNotificationsTitle}</p>
-                <p className="text-sm opacity-90">{t.header.noNotificationsText}</p>
+                <p className="text-[15px] font-semibold text-ink">{t.header.noNotificationsTitle}</p>
+                <p className="text-[13px] text-muted">{t.header.noNotificationsText}</p>
               </div>
             </div>
           ) : (
-            <ul className="space-y-2.5">
+            <ul className="inset-rows [--row-inset:44px]">
               {warnings.map((warning) => {
                 const severe = warning.level === 'over' || warning.level === 'full';
+                const Icon = severe ? CircleAlert : TriangleAlert;
                 return (
-                  <li
-                    key={warning.id}
-                    className={`flex items-start gap-3 rounded-2xl p-3.5 text-sm ${
-                      severe ? 'bg-danger-soft text-danger-ink' : warning.level === 'warn90' ? 'bg-serious-soft text-serious-ink' : 'bg-warn-soft text-warn-ink'
-                    }`}
-                  >
-                    <TriangleAlert className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
-                    <span>{warningMessage(warning)}</span>
+                  <li key={warning.id} className="flex items-start gap-3 py-3 first:pt-0 last:pb-0">
+                    <span
+                      className={`mt-0.5 grid size-8 shrink-0 place-items-center rounded-full ${
+                        severe ? 'bg-danger text-white' : warning.level === 'warn90' ? 'bg-serious text-white' : 'bg-warn text-black/75'
+                      }`}
+                      aria-hidden="true"
+                    >
+                      <Icon className="size-4" strokeWidth={2.4} />
+                    </span>
+                    <span className="min-w-0 flex-1 text-[14px] leading-snug text-ink">{warningMessage(warning)}</span>
                   </li>
                 );
               })}
@@ -260,10 +278,10 @@ export function BudgetPage() {
       <section aria-labelledby="category-budgets-title" className="space-y-4">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
-            <h2 id="category-budgets-title" className="font-display text-lg font-semibold tracking-[-0.01em] text-ink">
+            <h2 id="category-budgets-title" className="text-[22px] font-bold tracking-[-0.025em] text-ink">
               {t.budget.categoryBudgets}
             </h2>
-            <p className="text-sm text-muted">{t.budget.categoryBudgetsSub}</p>
+            <p className="text-[13px] text-muted">{t.budget.categoryBudgetsSub}</p>
           </div>
           {categoryCount === 0 && previousBudgets.some((budget) => budget.category !== 'total') && hasAnyBudget && (
             <Button variant="soft" size="sm" icon={Copy} onClick={copyPrevious}>
@@ -303,16 +321,16 @@ export function BudgetPage() {
       {summary.unbudgetedCategories.length > 0 && !isPastMonth && (
         <Card>
           <CardHeader title={t.budget.unbudgetedTitle} subtitle={t.budget.unbudgetedText} />
-          <ul className="divide-y divide-line">
+          <ul className="inset-rows [--row-inset:48px]">
             {summary.unbudgetedCategories.map(({ category, amount }) => {
               const Icon = CATEGORY_ICONS[category];
               return (
-                <li key={category} className="flex items-center gap-3 py-3">
-                  <span className="grid size-9 shrink-0 place-items-center rounded-lg bg-surface-3 text-ink-2" aria-hidden="true">
+                <li key={category} className="flex items-center gap-3 py-2.5">
+                  <span className="grid size-9 shrink-0 place-items-center rounded-full bg-fill text-ink-2" aria-hidden="true">
                     <Icon className="size-4" />
                   </span>
-                  <span className="min-w-0 flex-1 truncate font-medium text-ink">{t.categories[category]}</span>
-                  <span className="num text-sm font-semibold text-ink-2">{f.money(amount)}</span>
+                  <span className="min-w-0 flex-1 truncate text-[15px] text-ink">{t.categories[category]}</span>
+                  <span className="num text-[14px] font-semibold text-ink-2">{f.money(amount)}</span>
                   <Button variant="ghost" size="sm" icon={Plus} onClick={() => setModal({ kind: 'category', preset: category })}>
                     <span className="hidden sm:inline">{t.budget.setBudget}</span>
                     <span className="sr-only sm:hidden">

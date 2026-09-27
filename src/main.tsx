@@ -35,8 +35,8 @@ class ErrorBoundary extends Component<{ children: ReactNode }, { error: Error | 
     return (
       <div className="grid min-h-dvh place-items-center bg-canvas px-4 py-10">
         <div className="card max-w-md p-8 text-center">
-          <p className="font-display text-xl font-semibold text-ink">Etwas ist schiefgelaufen</p>
-          <p className="mt-2 text-sm text-muted">
+          <p className="text-[22px] font-semibold tracking-[-0.02em] text-ink">Etwas ist schiefgelaufen</p>
+          <p className="mt-2 text-[15px] text-muted">
             Die Anwendung ist auf einen unerwarteten Fehler gestoßen. Lade die Seite neu. Hilft das nicht, kannst du die
             gespeicherten Daten zurücksetzen – eine Sicherung bleibt im Browser erhalten.
           </p>
@@ -44,14 +44,14 @@ class ErrorBoundary extends Component<{ children: ReactNode }, { error: Error | 
             <button
               type="button"
               onClick={() => window.location.reload()}
-              className="h-11 rounded-xl bg-primary px-4 font-semibold text-primary-fg hover:bg-primary-hover"
+              className="btn-primary h-11 rounded-full px-5 font-semibold"
             >
               Neu laden
             </button>
             <button
               type="button"
               onClick={this.resetData}
-              className="h-11 rounded-xl border border-line-strong bg-surface px-4 font-semibold text-ink hover:bg-surface-2"
+              className="h-11 rounded-full bg-fill px-5 font-semibold text-primary-text hover:bg-fill-strong"
             >
               Daten zurücksetzen
             </button>

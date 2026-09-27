@@ -16,11 +16,11 @@ export function CategoryBubble({
   return (
     <span
       aria-hidden="true"
-      className={`grid shrink-0 place-items-center rounded-xl ${
-        type === 'income' ? 'bg-income-soft text-income-ink' : 'bg-surface-3 text-ink-2'
-      } ${size === 'sm' ? 'size-9' : 'size-10'}`}
+      className={`grid shrink-0 place-items-center rounded-full ${
+        type === 'income' ? 'bg-income-soft text-income-ink' : 'bg-fill text-ink-2'
+      } ${size === 'sm' ? 'size-7' : 'size-10'}`}
     >
-      <Icon className={size === 'sm' ? 'size-4' : 'size-[18px]'} strokeWidth={2} />
+      <Icon className={size === 'sm' ? 'size-[15px]' : 'size-[19px]'} strokeWidth={2} />
     </span>
   );
 }
@@ -30,11 +30,11 @@ export function TypeBadge({ type }: { type: TransactionType }) {
   const Icon = type === 'income' ? ArrowDownLeft : ArrowUpRight;
   return (
     <span
-      className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold ${
+      className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[12px] font-medium ${
         type === 'income' ? 'bg-income-soft text-income-ink' : 'bg-expense-soft text-expense-ink'
       }`}
     >
-      <Icon className="size-3.5" aria-hidden="true" strokeWidth={2.5} />
+      <Icon className="size-3" aria-hidden="true" strokeWidth={2.6} />
       {type === 'income' ? t.common.incomeSingular : t.common.expenseSingular}
     </span>
   );

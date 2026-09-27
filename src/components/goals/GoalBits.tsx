@@ -4,6 +4,7 @@ import { useI18n, useToday } from '../../state/store';
 import type { GoalColor, SavingsGoal } from '../../types';
 import { Button, IconButton } from '../ui/Button';
 import { ProgressBar } from '../ui/ProgressBar';
+import { RingProgress } from '../ui/RingProgress';
 
 export const goalColor = (color: GoalColor) => `var(--goal-${color})`;
 
@@ -16,15 +17,11 @@ export function GoalRow({ goal }: { goal: SavingsGoal }) {
   return (
     <li className="space-y-2">
       <div className="flex items-center gap-3">
-        <span
-          className="grid size-8 shrink-0 place-items-center rounded-lg"
-          style={{ background: `color-mix(in srgb, ${color} 16%, transparent)`, color }}
-          aria-hidden="true"
-        >
-          {reached ? <Trophy className="size-4" /> : <PiggyBank className="size-4" />}
+        <span className="grid size-8 shrink-0 place-items-center rounded-full text-white" style={{ background: color }} aria-hidden="true">
+          {reached ? <Trophy className="size-4" strokeWidth={2.2} /> : <PiggyBank className="size-4" strokeWidth={2.2} />}
         </span>
-        <span className="min-w-0 flex-1 truncate font-semibold text-ink">{goal.name}</span>
-        <span className="num text-sm font-bold text-ink">{f.percent(Math.min(progress, 999), 0)}</span>
+        <span className="min-w-0 flex-1 truncate text-[15px] font-medium text-ink">{goal.name}</span>
+        <span className="num text-[14px] font-semibold text-ink">{f.percent(Math.min(progress, 999), 0)}</span>
       </div>
       <ProgressBar
         percent={progress}
@@ -56,17 +53,13 @@ export function GoalCard({ goal, onEdit, onDelete, onAdjust }: GoalCardProps) {
   const overdue = !reached && goal.deadline !== null && goal.deadline < today;
 
   return (
-    <li className="card relative flex min-w-0 flex-col gap-5 overflow-hidden p-5 transition-shadow duration-200 hover:shadow-hover">
-      <div className="flex items-start gap-3">
-        <span
-          className="grid size-11 shrink-0 place-items-center rounded-2xl"
-          style={{ background: `color-mix(in srgb, ${color} 16%, transparent)`, color }}
-          aria-hidden="true"
-        >
-          {reached ? <Trophy className="size-5" /> : <PiggyBank className="size-5" />}
+    <li className="card flex min-w-0 flex-col gap-4 p-4 sm:p-5">
+      <div className="flex items-center gap-3">
+        <span className="grid size-9 shrink-0 place-items-center rounded-full text-white" style={{ background: color }} aria-hidden="true">
+          {reached ? <Trophy className="size-[18px]" strokeWidth={2.2} /> : <PiggyBank className="size-[18px]" strokeWidth={2.2} />}
         </span>
         <div className="min-w-0 flex-1">
-          <h3 className="truncate font-display text-[17px] font-semibold text-ink">{goal.name}</h3>
+          <h3 className="truncate text-[17px] font-semibold tracking-[-0.02em] text-ink">{goal.name}</h3>
           <p className="flex items-center gap-1.5 text-[13px] text-muted">
             {goal.deadline ? (
               <>
@@ -83,49 +76,45 @@ export function GoalCard({ goal, onEdit, onDelete, onAdjust }: GoalCardProps) {
             )}
           </p>
         </div>
-        <div className="-mr-2 -mt-1 flex">
+        <div className="-mr-2 flex">
           <IconButton icon={Pencil} size="sm" tone="primary" label={t.goals.editLabel(goal.name)} onClick={onEdit} />
           <IconButton icon={Trash2} size="sm" tone="danger" label={t.goals.deleteLabel(goal.name)} onClick={onDelete} />
         </div>
       </div>
 
-      <div className="space-y-2.5">
-        <div className="flex items-end justify-between gap-3">
-          <div className="min-w-0">
-            <p className="text-xs font-semibold uppercase tracking-[0.06em] text-muted">{t.goals.saved}</p>
-            <p className="num truncate font-display text-2xl font-semibold tracking-[-0.03em] text-ink">
-              {f.money(goal.currentAmount)}
-            </p>
-          </div>
-          <p className="num shrink-0 pb-1 text-sm text-muted">
-            {t.common.of} {f.money(goal.targetAmount)}
-          </p>
-        </div>
-        <ProgressBar
+      <div className="flex items-center gap-5">
+        <RingProgress
           percent={progress}
           color={color}
-          size="lg"
+          size={96}
+          thickness={12}
           label={t.goals.progressLabel(goal.name)}
           valueText={`${f.percent(progress, 0)} – ${f.money(goal.currentAmount)} / ${f.money(goal.targetAmount)}`}
-        />
-        <div className="num flex items-center justify-between gap-2 text-[13px]">
-          <span className="font-semibold text-ink-2">{f.percent(Math.min(progress, 999), 0)}</span>
+        >
+          <span className="num text-[17px] font-semibold tracking-[-0.02em] text-ink">{f.percent(Math.min(progress, 999), 0)}</span>
+        </RingProgress>
+        <div className="min-w-0 flex-1">
+          <p className="text-[13px] text-muted">{t.goals.saved}</p>
+          <p className="num truncate font-display text-[24px] font-semibold leading-tight tracking-[-0.03em] text-ink">
+            {f.money(goal.currentAmount)}
+          </p>
+          <p className="num text-[13px] text-muted">
+            {t.common.of} {f.money(goal.targetAmount)}
+          </p>
           {reached ? (
-            <span className="inline-flex items-center gap-1 rounded-full bg-income-soft px-2 py-0.5 text-xs font-semibold text-income-ink">
+            <span className="mt-2 inline-flex items-center gap-1 rounded-full bg-income-soft px-2 py-0.5 text-[12px] font-semibold text-income-ink">
               <Trophy className="size-3.5" aria-hidden="true" />
               {t.goals.reached}
             </span>
           ) : (
-            <span className="text-muted">{t.goals.remaining(f.money(goal.targetAmount - goal.currentAmount))}</span>
+            <p className="num mt-1 text-[13px] font-medium text-ink-2">{t.goals.remaining(f.money(goal.targetAmount - goal.currentAmount))}</p>
           )}
         </div>
       </div>
 
-      <div className="mt-auto flex flex-wrap items-center justify-between gap-3 border-t border-line pt-4">
-        <p className="min-w-0 flex-1 text-[13px] text-muted">
-          {perMonth !== null ? t.goals.perMonth(f.money(perMonth)) : ''}
-        </p>
-        <Button variant="soft" size="sm" icon={HandCoins} onClick={onAdjust} aria-label={t.goals.depositLabel(goal.name)}>
+      <div className="-mx-4 -mb-4 mt-auto flex flex-wrap items-center justify-between gap-3 px-4 py-3 shadow-[inset_0_0.5px_0_var(--separator)] sm:-mx-5 sm:-mb-5 sm:px-5">
+        <p className="min-w-0 flex-1 text-[13px] text-muted">{perMonth !== null ? t.goals.perMonth(f.money(perMonth)) : ''}</p>
+        <Button variant="secondary" size="sm" icon={HandCoins} onClick={onAdjust} aria-label={t.goals.depositLabel(goal.name)}>
           {t.goals.deposit}
         </Button>
       </div>

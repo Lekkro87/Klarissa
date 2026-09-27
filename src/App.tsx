@@ -1,6 +1,6 @@
 import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Header } from './components/layout/Header';
-import { MobileDrawer, MobileTabBar, Sidebar } from './components/layout/Navigation';
+import { MobileTabBar, MoreSheet, Sidebar } from './components/layout/Navigation';
 import { Onboarding } from './components/onboarding/Onboarding';
 import { TransactionModal } from './components/transactions/TransactionModal';
 import { useConfirm } from './components/ui/ConfirmDialog';
@@ -18,7 +18,7 @@ import { StatisticsPage } from './pages/StatisticsPage';
 import { TransactionsPage } from './pages/TransactionsPage';
 import { useActions, useData, useI18n, useToday } from './state/store';
 import { type AppUi, AppUiContext, type Intent } from './state/ui';
-import type { ThemePreference, Transaction, TransactionType } from './types';
+import type { Transaction, TransactionType } from './types';
 
 const SEEN_KEY = 'klarissa.budget.seen-warnings';
 
@@ -40,24 +40,6 @@ function saveSeen(ids: Set<string>) {
   }
 }
 
-/** Tatsächlich aktives Farbschema (für den Umschalter im Header). */
-function useResolvedDark(theme: ThemePreference): boolean {
-  const [systemDark, setSystemDark] = useState(
-    () => typeof window !== 'undefined' && window.matchMedia?.('(prefers-color-scheme: dark)').matches,
-  );
-  useEffect(() => {
-    const query = window.matchMedia?.('(prefers-color-scheme: dark)');
-    if (!query) return;
-    const onChange = (event: MediaQueryListEvent) => setSystemDark(event.matches);
-    query.addEventListener('change', onChange);
-    return () => query.removeEventListener('change', onChange);
-  }, []);
-  if (theme !== 'system') return theme === 'dark';
-  const attribute = document.documentElement.getAttribute('data-theme');
-  if (attribute === 'dark' || attribute === 'light') return attribute === 'dark';
-  return systemDark;
-}
-
 export function App() {
   const [route, setRoute] = useHashRoute();
   const data = useData();
@@ -68,7 +50,7 @@ export function App() {
   const today = useToday();
 
   const [intent, setIntent] = useState<Intent>(null);
-  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [moreOpen, setMoreOpen] = useState(false);
   const [txModal, setTxModal] = useState<{ open: boolean; tx: Transaction | null; type: TransactionType }>({
     open: false,
     tx: null,
@@ -87,8 +69,6 @@ export function App() {
     setSeen(next);
     saveSeen(next);
   };
-
-  const isDark = useResolvedDark(data.settings.theme);
 
   // Seitentitel, Scroll-Position und Fokus beim Seitenwechsel
   const firstRender = useRef(true);
@@ -211,35 +191,44 @@ export function App() {
       </a>
 
       <Sidebar {...navProps} />
-      <MobileDrawer {...navProps} open={drawerOpen} onClose={() => setDrawerOpen(false)} />
 
-      <div className="min-h-dvh lg:pl-[280px]">
+      <div className="min-h-dvh lg:pl-[260px]">
         <Header
           route={route}
-          onOpenMenu={() => setDrawerOpen(true)}
           onNavigate={(next) => navigate(next)}
+          onAddTransaction={() => ui.openTransaction()}
           query={filters.query}
           onQueryChange={(query) => updateFilters({ query })}
           warnings={warnings}
           unreadIds={unreadIds}
           onMarkAllRead={markAllRead}
-          isDark={isDark}
-          onToggleTheme={() => actions.updateSettings({ theme: isDark ? 'light' : 'dark' })}
         />
-        <main id="main" tabIndex={-1} className="mx-auto max-w-[1440px] px-4 pb-32 pt-6 outline-none sm:px-6 sm:pt-8 lg:px-8 lg:pb-14">
+        <main
+          id="main"
+          tabIndex={-1}
+          className="mx-auto max-w-[1180px] px-4 pb-[calc(env(safe-area-inset-bottom,0px)+112px)] pt-4 outline-none sm:px-6 sm:pt-6 lg:px-10 lg:pb-16 lg:pt-8"
+        >
           <div key={route} className="animate-page">
             {page}
           </div>
         </main>
       </div>
 
-      <MobileTabBar route={route} onNavigate={(next) => navigate(next)} onAddTransaction={() => ui.openTransaction()} />
+      <MobileTabBar route={route} onNavigate={(next) => navigate(next)} onOpenMore={() => setMoreOpen(true)} moreOpen={moreOpen} />
+      <MoreSheet
+        open={moreOpen}
+        onClose={() => setMoreOpen(false)}
+        route={route}
+        onNavigate={(next) => navigate(next)}
+        warningCount={warnings.length}
+      />
 
       <TransactionModal
         open={txModal.open}
         transaction={txModal.tx}
         defaultType={txModal.type}
         onClose={() => setTxModal((current) => ({ ...current, open: false }))}
+        onDelete={(tx) => void deleteTransaction(tx)}
       />
       <ToastViewport />
     </AppUiContext.Provider>

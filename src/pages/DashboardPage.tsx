@@ -1,7 +1,5 @@
 import {
-  ArrowDownRight,
-  ArrowRight,
-  ArrowUpRight,
+  ChevronRight,
   Coins,
   Landmark,
   Percent,
@@ -175,94 +173,61 @@ export function DashboardPage() {
   const previousYm = addMonths(ym, -1);
   const shownBudgets = budgetSummary.categories.slice(0, 4);
 
+  const balanceUp = trends.balance[trends.balance.length - 1] >= trends.balance[0];
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div className="min-w-0">
-          <p className="eyebrow mb-2">{f.weekdayDate(today)}</p>
-          <h1
-            id="page-title"
-            tabIndex={-1}
-            className="font-display text-[28px] font-semibold leading-tight tracking-[-0.035em] text-ink outline-none sm:text-[34px]"
-          >
+          <p className="mb-1 text-[13px] font-semibold uppercase tracking-[0.02em] text-muted">{f.weekdayDate(today)}</p>
+          <h1 id="page-title" tabIndex={-1} className="large-title text-[30px] text-ink outline-none sm:text-[34px]">
             {t.dashboard.greeting(firstName)}
           </h1>
-          <p className="mt-1.5 text-[15px] text-muted">{t.dashboard.subtitle}</p>
+          <p className="mt-1 text-[15px] text-muted">{t.dashboard.subtitle}</p>
         </div>
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-          <SegmentedControl
-            label={t.dashboard.periodLabel}
-            value={period}
-            onChange={setPeriod}
-            options={periodOptions}
-            mobileSelect
-          />
-          {/* Auf dem Smartphone übernimmt der Plus-Button in der Tab-Leiste diese Aktion */}
-          <div className="hidden sm:block">
-            <Button icon={Plus} onClick={() => ui.openTransaction()}>
-              {t.actions.addTransaction}
-            </Button>
-          </div>
-        </div>
+        <SegmentedControl label={t.dashboard.periodLabel} value={period} onChange={setPeriod} options={periodOptions} mobileSelect />
       </div>
 
       <div className="grid gap-4 xl:grid-cols-12">
-        <section className="hero-card flex min-h-[290px] flex-col p-6 sm:p-7 xl:col-span-5" aria-labelledby="balance-title">
-          <div className="relative flex items-start justify-between gap-4">
-            <div className="min-w-0">
-              <h2 id="balance-title" className="text-sm font-medium text-[var(--hero-muted)]">
-                {t.dashboard.balance}
-              </h2>
-              <p className="mt-3 truncate font-display text-[40px] font-semibold leading-none tracking-[-0.045em] sm:text-[48px]">
-                {f.money(metrics.balance)}
-              </p>
-            </div>
-            <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-white/10 ring-1 ring-white/15" aria-hidden="true">
-              <Landmark className="size-5" />
-            </span>
-          </div>
-          <div className="relative mt-4 flex flex-wrap items-center gap-2 text-[13px] text-[var(--hero-muted)]">
-            {metrics.balanceChange !== null && (
-              <span
-                className={`num inline-flex items-center gap-0.5 rounded-full px-2 py-0.5 text-xs font-semibold ${
-                  metrics.balanceChange >= 0 ? 'bg-emerald-400/15 text-emerald-300' : 'bg-rose-400/15 text-rose-300'
-                }`}
-              >
-                {metrics.balanceChange >= 0 ? (
-                  <ArrowUpRight className="size-3.5" aria-hidden="true" strokeWidth={2.5} />
-                ) : (
-                  <ArrowDownRight className="size-3.5" aria-hidden="true" strokeWidth={2.5} />
-                )}
-                {f.signedPercent(metrics.balanceChange)}
+        <section className="card flex min-h-[300px] flex-col p-5 sm:p-6 xl:col-span-5" aria-labelledby="balance-title">
+          <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
+            <h2 id="balance-title" className="flex items-center gap-1.5 text-[15px] font-semibold tracking-[-0.01em] text-primary-text">
+              <Landmark className="size-[17px]" aria-hidden="true" strokeWidth={2.4} />
+              {t.dashboard.balance}
+            </h2>
+            <button
+              type="button"
+              onClick={() => ui.navigate('cash')}
+              title={t.cash.openCash}
+              className="inline-flex max-w-full items-center gap-1.5 rounded-full bg-fill py-1 pl-1 pr-2 text-[13px] text-ink-2 transition-colors hover:bg-fill-strong active:opacity-70"
+            >
+              <span className="grid size-[22px] place-items-center rounded-full bg-income text-white" aria-hidden="true">
+                <Coins className="size-3" strokeWidth={2.6} />
               </span>
-            )}
+              <span className="truncate">{t.cash.dashboardLabel}:</span>
+              <strong className="num font-semibold text-ink">{f.money(cashTotal)}</strong>
+              <ChevronRight className="size-3.5 text-muted" aria-hidden="true" strokeWidth={2.6} />
+            </button>
+          </div>
+          <p className="num mt-4 truncate font-display text-[40px] font-semibold leading-none tracking-[-0.035em] text-ink sm:text-[46px]">
+            {f.money(metrics.balance)}
+          </p>
+          <div className="mt-3 flex flex-wrap items-center gap-2 text-[13px] text-muted">
+            {metrics.balanceChange !== null && <Delta value={metrics.balanceChange} text={f.signedPercent(metrics.balanceChange)} />}
             <span>{metrics.balanceChange === null ? t.dashboard.noComparison : t.dashboard.comparison.balance}</span>
           </div>
-          <button
-            type="button"
-            onClick={() => ui.navigate('cash')}
-            title={t.cash.openCash}
-            className="relative mt-4 inline-flex max-w-full items-center gap-2 self-start rounded-full bg-white/10 py-1.5 pl-1.5 pr-3.5 text-[13px] text-[var(--hero-muted)] ring-1 ring-white/15 transition-colors hover:bg-white/15"
-          >
-            <span className="grid size-6 place-items-center rounded-full bg-[#86efc4]/20 text-[#86efc4]" aria-hidden="true">
-              <Coins className="size-3.5" />
-            </span>
-            <span className="truncate">{t.cash.dashboardLabel}:</span>
-            <strong className="num font-semibold text-white">{f.money(cashTotal)}</strong>
-          </button>
-          <div className="relative mt-auto flex min-h-[112px] flex-1 flex-col pt-7">
-            <div className="min-h-[80px] flex-1">
+          <div className="mt-auto flex min-h-[124px] flex-1 flex-col pt-6">
+            <div className="min-h-[88px] flex-1">
               <Sparkline
                 values={trends.balance}
                 labels={trends.labels}
-                color="#a5b4fc"
+                color={balanceUp ? 'var(--income)' : 'var(--expense)'}
                 format={f.money}
                 label={t.dashboard.balanceTrend}
                 height="fill"
-                inverse
               />
             </div>
-            <div className="mt-2.5 flex items-center justify-between gap-3 whitespace-nowrap text-[11px] font-medium text-[var(--hero-muted)]">
+            <div className="mt-2.5 flex items-center justify-between gap-3 whitespace-nowrap border-t-[0.5px] border-[var(--separator)] pt-2 text-[11px] font-medium text-muted">
               <span>{trends.axisStart}</span>
               <span className="hidden truncate sm:inline">{t.dashboard.balanceTrend}</span>
               <span>{trends.axisEnd}</span>
@@ -391,7 +356,7 @@ export function DashboardPage() {
                     ].map((bar) => (
                       <div key={bar.label} className="flex items-center gap-2.5">
                         <span className="w-9 shrink-0 text-xs text-muted">{bar.label}</span>
-                        <div className="h-2 flex-1 overflow-hidden rounded-full bg-surface-3">
+                        <div className="h-2 flex-1 overflow-hidden rounded-full bg-fill">
                           <div
                             className="animate-grow h-full rounded-full transition-[width] duration-500"
                             style={{
@@ -430,14 +395,14 @@ export function DashboardPage() {
             title={t.dashboard.budgetOverview}
             subtitle={t.dashboard.budgetOverviewSub(f.monthYear(ym))}
             actions={
-              <Button variant="ghost" size="sm" iconRight={ArrowRight} onClick={() => ui.navigate('budget')}>
+              <Button variant="ghost" size="sm" iconRight={ChevronRight} onClick={() => ui.navigate('budget')}>
                 {t.common.viewAll}
               </Button>
             }
           />
           {budgetSummary.amount > 0 ? (
             <div className="space-y-5">
-              <div className="rounded-2xl bg-surface-2 p-4">
+              <div className="rounded-[14px] bg-surface-2 p-4">
                 <div className="flex items-baseline justify-between gap-3">
                   <span className="text-sm font-semibold text-ink-2">{t.budget.monthlyBudget}</span>
                   <span className="num text-sm text-muted">
@@ -446,8 +411,7 @@ export function DashboardPage() {
                 </div>
                 <div className="mt-2.5">
                   <div
-                    className="h-2.5 overflow-hidden rounded-full"
-                    style={{ background: 'color-mix(in srgb, var(--primary) 14%, var(--surface-3))' }}
+                    className="h-2 overflow-hidden rounded-full bg-fill"
                     role="progressbar"
                     aria-label={t.budget.monthlyBudget}
                     aria-valuemin={0}
@@ -516,7 +480,7 @@ export function DashboardPage() {
               className="mb-3"
               title={t.dashboard.recentTransactions}
               actions={
-                <Button variant="ghost" size="sm" iconRight={ArrowRight} onClick={() => ui.navigate('transactions')}>
+                <Button variant="ghost" size="sm" iconRight={ChevronRight} onClick={() => ui.navigate('transactions')}>
                   {t.common.viewAll}
                 </Button>
               }
@@ -534,7 +498,7 @@ export function DashboardPage() {
               }
             />
           ) : (
-            <ul className="divide-y divide-line px-2 pb-2 sm:px-3 sm:pb-3">
+            <ul className="inset-rows pb-2 [--row-inset:68px] sm:[--row-inset:72px]">
               {recent.map((tx) => {
                 const title = titleOf(tx);
                 return (
@@ -543,11 +507,11 @@ export function DashboardPage() {
                       type="button"
                       onClick={() => ui.openTransaction(tx)}
                       aria-label={t.transactions.editLabel(title)}
-                      className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left transition-colors hover:bg-surface-2"
+                      className="flex w-full items-center gap-3 px-4 py-2.5 text-left transition-colors hover:bg-fill active:bg-fill-strong sm:px-5"
                     >
                       <CategoryBubble category={tx.category} type={tx.type} />
                       <span className="min-w-0 flex-1">
-                        <span className={`block truncate font-semibold ${tx.description ? 'text-ink' : 'text-muted'}`}>{title}</span>
+                        <span className={`block truncate text-[15px] font-medium ${tx.description ? 'text-ink' : 'text-muted'}`}>{title}</span>
                         <span className="block truncate text-[13px] text-muted">
                           {t.categories[tx.category]} · {f.date(tx.date)}
                         </span>
@@ -565,7 +529,7 @@ export function DashboardPage() {
           <CardHeader
             title={t.dashboard.savingsGoals}
             actions={
-              <Button variant="ghost" size="sm" iconRight={ArrowRight} onClick={() => ui.navigate('goals')}>
+              <Button variant="ghost" size="sm" iconRight={ChevronRight} onClick={() => ui.navigate('goals')}>
                 {t.common.viewAll}
               </Button>
             }

@@ -5,7 +5,6 @@ import { amountToInput, parseAmount } from '../../lib/money';
 import { GOAL_COLORS, GOAL_NAME_MAX } from '../../lib/storage';
 import { useActions, useI18n } from '../../state/store';
 import type { GoalColor, SavingsGoal } from '../../types';
-import { Button } from '../ui/Button';
 import { Field, fieldAria } from '../ui/Field';
 import { Modal } from '../ui/Modal';
 import { SegmentedControl } from '../ui/SegmentedControl';
@@ -30,16 +29,7 @@ export function GoalModal({ open, goal, onClose }: GoalModalProps) {
       open={open}
       onClose={onClose}
       title={goal ? t.goals.editGoal : t.goals.newGoal}
-      footer={
-        <>
-          <Button variant="secondary" onClick={onClose}>
-            {t.common.cancel}
-          </Button>
-          <Button type="submit" form={formId}>
-            {goal ? t.goals.submitUpdate : t.goals.submitCreate}
-          </Button>
-        </>
-      }
+      confirm={{ label: goal ? t.form.saveShort : t.goals.create, form: formId }}
     >
       {open && <GoalForm formId={formId} goal={goal} onDone={onClose} />}
     </Modal>
@@ -134,10 +124,8 @@ function GoalForm({ formId, goal, onDone }: { formId: string; goal: SavingsGoal 
               key={suggestion}
               type="button"
               onClick={() => setName(suggestion)}
-              className={`rounded-full border px-3 py-1.5 text-[13px] font-medium transition-colors ${
-                name === suggestion
-                  ? 'border-primary bg-primary-soft text-primary-text'
-                  : 'border-line text-ink-2 hover:border-line-strong hover:bg-surface-2'
+              className={`rounded-full px-3 py-1.5 text-[13px] font-medium transition-colors ${
+                name === suggestion ? 'bg-primary text-white' : 'bg-fill text-ink-2 hover:bg-fill-strong'
               }`}
             >
               {suggestion}
@@ -160,7 +148,7 @@ function GoalForm({ formId, goal, onDone }: { formId: string; goal: SavingsGoal 
               placeholder={language === 'de' ? '1.500' : '1,500'}
               value={target}
               onChange={(event) => setTarget(event.target.value.slice(0, 20))}
-              className="num h-full w-full min-w-0 bg-transparent font-semibold text-ink outline-none placeholder:text-line-strong"
+              className="num h-full w-full min-w-0 bg-transparent font-semibold text-ink outline-none placeholder:text-muted/40"
             />
           </div>
         </Field>
@@ -177,7 +165,7 @@ function GoalForm({ formId, goal, onDone }: { formId: string; goal: SavingsGoal 
               placeholder="0"
               value={current}
               onChange={(event) => setCurrent(event.target.value.slice(0, 20))}
-              className="num h-full w-full min-w-0 bg-transparent font-semibold text-ink outline-none placeholder:text-line-strong"
+              className="num h-full w-full min-w-0 bg-transparent font-semibold text-ink outline-none placeholder:text-muted/40"
             />
           </div>
         </Field>
@@ -250,16 +238,7 @@ export function AdjustGoalModal({ goal, onClose }: AdjustModalProps) {
       size="sm"
       title={goal ? t.goals.adjustTitle(goal.name) : ''}
       description={goal ? t.goals.adjustDescription(f.money(goal.currentAmount), f.money(goal.targetAmount)) : undefined}
-      footer={
-        <>
-          <Button variant="secondary" onClick={onClose}>
-            {t.common.cancel}
-          </Button>
-          <Button type="submit" form={formId} icon={mode === 'deposit' ? Plus : Minus}>
-            {mode === 'deposit' ? t.goals.depositSubmit : t.goals.withdrawSubmit}
-          </Button>
-        </>
-      }
+      confirm={{ label: mode === 'deposit' ? t.goals.deposit : t.goals.withdraw, form: formId }}
     >
       {goal && (
         <AdjustForm
@@ -359,7 +338,7 @@ function AdjustForm({
             placeholder={t.form.amountPlaceholder}
             value={amount}
             onChange={(event) => setAmount(event.target.value.slice(0, 20))}
-            className="num h-full w-full min-w-0 bg-transparent font-display text-xl font-semibold text-ink outline-none placeholder:text-line-strong"
+            className="num h-full w-full min-w-0 bg-transparent font-display text-xl font-semibold text-ink outline-none placeholder:text-muted/40"
           />
         </div>
       </Field>

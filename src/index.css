@@ -1,237 +1,250 @@
 @import 'tailwindcss';
 
 /*
- * Design-Tokens
- * Alle Farben laufen über CSS-Variablen. Das helle Schema steht auf :root,
- * das dunkle greift bei data-theme="dark" oder – im Modus „System“ –
- * über prefers-color-scheme. Komponenten verwenden ausschließlich Tokens.
+ * Design-Tokens im Apple-Stil (iOS/macOS)
+ * Systemfarben, gruppierte Hintergründe und Materialien. Das helle Schema
+ * steht auf :root, das dunkle greift bei data-theme="dark" oder – im Modus
+ * „System“ – über prefers-color-scheme. Komponenten nutzen nur Tokens.
  */
 :root {
   color-scheme: light;
 
-  --canvas: #f5f6fa;
+  /* Hintergründe (systemGroupedBackground & Co.) */
+  --canvas: #f2f2f7;
   --surface: #ffffff;
-  --surface-2: #f8f9fc;
-  --surface-3: #eef0f6;
-  --line: #e7e9f1;
-  --line-strong: #d3d7e3;
+  --surface-2: #f2f2f7;
+  --surface-3: #e5e5ea;
+  --fill: rgb(118 118 128 / 0.12);
+  --fill-strong: rgb(118 118 128 / 0.2);
+  --line: #e3e3e8;
+  --line-strong: #c7c7cc;
+  --separator: rgb(60 60 67 / 0.18);
 
-  --ink: #12131a;
-  --ink-2: #373c4d;
-  --muted: #5e6478;
+  /* Beschriftungen (label, secondaryLabel …) */
+  --ink: #1d1d1f;
+  --ink-2: #3a3a3c;
+  --muted: #6e6e73;
 
-  --primary: #4f46e5;
-  --primary-hover: #4338ca;
+  /* Akzent: systemBlue */
+  --primary: #0071e3;
+  --primary-hover: #0077ed;
   --primary-fg: #ffffff;
-  --primary-text: #4338ca;
-  --primary-soft: #eef0ff;
-  --focus: #4f46e5;
+  --primary-text: #0066cc;
+  --primary-soft: #e8f1fd;
+  --focus: rgb(0 122 255 / 0.55);
 
-  --income: #1baf7a;
-  --income-ink: #0b7650;
-  --income-soft: #e6f6ef;
-  --expense: #e34948;
-  --expense-ink: #bf3337;
-  --expense-soft: #fdecec;
+  /* systemGreen / systemRed – Füllfarbe, Text, Hintergrund */
+  --income: #34c759;
+  --income-ink: #248a3d;
+  --income-soft: #e5f7ea;
+  --expense: #ff3b30;
+  --expense-ink: #d70015;
+  --expense-soft: #ffe8e6;
 
-  --warn: #eda100;
-  --warn-ink: #875600;
-  --warn-soft: #fdf4dd;
-  --serious: #ec835a;
-  --serious-ink: #a8491f;
-  --serious-soft: #fdeee6;
-  --danger: #d03b3b;
-  --danger-ink: #b42f2f;
-  --danger-soft: #fcebeb;
+  /* Warnstufen: Gelb (75 %), Orange (90 %), Rot (100 %) */
+  --warn: #ffcc00;
+  --warn-ink: #946200;
+  --warn-soft: #fff6d6;
+  --serious: #ff9500;
+  --serious-ink: #c93400;
+  --serious-soft: #ffeedb;
+  --danger: #ff3b30;
+  --danger-ink: #d70015;
+  --danger-soft: #ffe8e6;
 
-  --grid: #eceef4;
-  --axis: #7b8196;
+  --grid: #e5e5ea;
+  --axis: #8e8e93;
 
-  --chart-1: #2a78d6;
-  --chart-2: #eb6834;
-  --chart-3: #1baf7a;
-  --chart-4: #eda100;
-  --chart-5: #e87ba4;
-  --chart-6: #008300;
-  --chart-7: #4a3aa7;
-  --chart-other: #a4a9b8;
+  /* Diagramme: Apple-Systemfarben in validierter Reihenfolge */
+  --chart-1: #007aff;
+  --chart-2: #34c759;
+  --chart-3: #af52de;
+  --chart-4: #ff9500;
+  --chart-5: #ff2d55;
+  --chart-6: #5856d6;
+  --chart-7: #5856d6;
+  --chart-other: #aeaeb2;
 
-  --goal-blue: #2a78d6;
-  --goal-green: #1baf7a;
-  --goal-orange: #eb6834;
-  --goal-violet: #6a5acd;
-  --goal-magenta: #d55181;
-  --goal-yellow: #d99400;
+  --goal-blue: #007aff;
+  --goal-green: #34c759;
+  --goal-orange: #ff9500;
+  --goal-violet: #af52de;
+  --goal-magenta: #ff2d55;
+  --goal-yellow: #ffcc00;
 
-  /* Kontostand-Karte: tiefes Nachtblau mit Indigo-Schein */
-  --hero-from: #1b1e3d;
-  --hero-to: #0f1124;
-  --hero-glow: rgb(99 102 241 / 0.55);
-  --hero-text: #ffffff;
-  --hero-muted: #c7cbf5;
+  /* Apple-Cash-Karte (Bargeld) */
+  --wallet-from: #2c2c2e;
+  --wallet-to: #0b0b0c;
 
-  --glow-1: rgb(99 102 241 / 0.13);
-  --glow-2: rgb(56 189 248 / 0.08);
-  --card-sheen: linear-gradient(transparent, transparent);
+  /* Materialien (Glas) */
   --glass: rgb(255 255 255 / 0.72);
+  --glass-bar: rgb(249 249 251 / 0.78);
+  --glass-sidebar: rgb(246 246 248 / 0.82);
 
-  --shadow-card: 0 1px 2px rgb(18 19 26 / 0.04), 0 6px 20px -12px rgb(18 19 26 / 0.12);
-  --shadow-hover: 0 2px 6px rgb(18 19 26 / 0.05), 0 16px 32px -14px rgb(18 19 26 / 0.2);
-  --shadow-pop: 0 24px 48px -16px rgb(18 19 26 / 0.3), 0 6px 14px -6px rgb(18 19 26 / 0.12);
-  --shadow-primary: 0 10px 22px -10px rgb(79 70 229 / 0.7);
-  --backdrop: rgb(12 13 22 / 0.42);
+  --shadow-card: 0 0 0 transparent;
+  --shadow-hover: 0 6px 20px -8px rgb(0 0 0 / 0.14);
+  --shadow-pop: 0 14px 44px -10px rgb(0 0 0 / 0.26), 0 2px 8px rgb(0 0 0 / 0.06);
+  --shadow-primary: 0 1px 2px rgb(0 0 0 / 0.08);
+  --shadow-thumb: 0 3px 8px rgb(0 0 0 / 0.12), 0 3px 1px rgb(0 0 0 / 0.04);
+  --seg-thumb: #ffffff;
+  --backdrop: rgb(0 0 0 / 0.36);
+  --row-alt: rgb(0 0 0 / 0.022);
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
     color-scheme: dark;
 
-    --canvas: #0b0d14;
-    --surface: #12151f;
-    --surface-2: #171b27;
-    --surface-3: #1f2432;
-    --line: #232937;
-    --line-strong: #333a4b;
+    --canvas: #000000;
+    --surface: #1c1c1e;
+    --surface-2: #2c2c2e;
+    --surface-3: #3a3a3c;
+    --fill: rgb(118 118 128 / 0.24);
+    --fill-strong: rgb(118 118 128 / 0.36);
+    --line: #2c2c2e;
+    --line-strong: #48484a;
+    --separator: rgb(84 84 88 / 0.6);
 
-    --ink: #eef0f7;
-    --ink-2: #c8ccd8;
-    --muted: #9aa1b4;
+    --ink: #f5f5f7;
+    --ink-2: #e5e5ea;
+    --muted: #98989f;
 
-    --primary: #5850ec;
-    --primary-hover: #6a63f0;
+    --primary: #0a84ff;
+    --primary-hover: #2890ff;
     --primary-fg: #ffffff;
-    --primary-text: #a9adff;
-    --primary-soft: #1c1f3f;
-    --focus: #8f94ff;
+    --primary-text: #409cff;
+    --primary-soft: #0c2440;
+    --focus: rgb(10 132 255 / 0.6);
 
-    --income: #199e70;
-    --income-ink: #4fd39c;
-    --income-soft: #11281f;
-    --expense: #e66767;
-    --expense-ink: #ff8f86;
-    --expense-soft: #311a1d;
+    --income: #30d158;
+    --income-ink: #30d158;
+    --income-soft: #0f2d18;
+    --expense: #ff453a;
+    --expense-ink: #ff6961;
+    --expense-soft: #3b1512;
 
-    --warn: #c98500;
-    --warn-ink: #f2c04e;
-    --warn-soft: #2e2512;
-    --serious: #d95926;
-    --serious-ink: #f5a27e;
-    --serious-soft: #321f17;
-    --danger: #e05252;
-    --danger-ink: #ff8f86;
-    --danger-soft: #331b1e;
+    --warn: #ffd60a;
+    --warn-ink: #ffd60a;
+    --warn-soft: #362e05;
+    --serious: #ff9f0a;
+    --serious-ink: #ffb340;
+    --serious-soft: #3a2507;
+    --danger: #ff453a;
+    --danger-ink: #ff6961;
+    --danger-soft: #3b1512;
 
-    --grid: #1e2330;
-    --axis: #8a91a5;
+    --grid: #2c2c2e;
+    --axis: #8e8e93;
 
-    --chart-1: #3987e5;
-    --chart-2: #d95926;
-    --chart-3: #199e70;
-    --chart-4: #c98500;
-    --chart-5: #d55181;
-    --chart-6: #008300;
-    --chart-7: #9085e9;
-    --chart-other: #5d6477;
+    --chart-1: #0a84ff;
+    --chart-2: #25a244;
+    --chart-3: #bf5af2;
+    --chart-4: #c47808;
+    --chart-5: #f0386b;
+    --chart-6: #6e6cf0;
+    --chart-7: #6e6cf0;
+    --chart-other: #636366;
 
-    --goal-blue: #3987e5;
-    --goal-green: #199e70;
-    --goal-orange: #d95926;
-    --goal-violet: #9085e9;
-    --goal-magenta: #d55181;
-    --goal-yellow: #c98500;
+    --goal-blue: #0a84ff;
+    --goal-green: #30d158;
+    --goal-orange: #ff9f0a;
+    --goal-violet: #bf5af2;
+    --goal-magenta: #ff375f;
+    --goal-yellow: #ffd60a;
 
-    --hero-from: #1e2252;
-    --hero-to: #12152c;
-    --hero-glow: rgb(118 110 255 / 0.5);
-    --hero-text: #ffffff;
-    --hero-muted: #c7cbf5;
+    --wallet-from: #3a3a3c;
+    --wallet-to: #121214;
 
-    --glow-1: rgb(99 102 241 / 0.16);
-    --glow-2: rgb(56 189 248 / 0.05);
-    --card-sheen: linear-gradient(180deg, rgb(255 255 255 / 0.03), rgb(255 255 255 / 0) 42%);
-    --glass: rgb(18 21 31 / 0.72);
+    --glass: rgb(44 44 46 / 0.72);
+    --glass-bar: rgb(22 22 23 / 0.78);
+    --glass-sidebar: rgb(28 28 30 / 0.82);
 
-    --shadow-card: 0 1px 2px rgb(0 0 0 / 0.35), 0 8px 24px -14px rgb(0 0 0 / 0.6);
-    --shadow-hover: 0 2px 6px rgb(0 0 0 / 0.35), 0 18px 36px -14px rgb(0 0 0 / 0.7);
-    --shadow-pop: 0 26px 52px -16px rgb(0 0 0 / 0.75), 0 6px 14px -6px rgb(0 0 0 / 0.5);
-    --shadow-primary: 0 10px 24px -10px rgb(88 80 236 / 0.8);
-    --backdrop: rgb(3 4 9 / 0.66);
+    --shadow-card: 0 0 0 transparent;
+    --shadow-hover: 0 6px 20px -8px rgb(0 0 0 / 0.6);
+    --shadow-pop: 0 14px 44px -10px rgb(0 0 0 / 0.7), 0 2px 8px rgb(0 0 0 / 0.3);
+    --shadow-primary: 0 1px 2px rgb(0 0 0 / 0.3);
+    --shadow-thumb: 0 3px 8px rgb(0 0 0 / 0.4), 0 3px 1px rgb(0 0 0 / 0.1);
+    --seg-thumb: #636366;
+    --backdrop: rgb(0 0 0 / 0.55);
+    --row-alt: rgb(255 255 255 / 0.03);
   }
 }
 
 :root[data-theme='dark'] {
   color-scheme: dark;
 
-  --canvas: #0b0d14;
-  --surface: #12151f;
-  --surface-2: #171b27;
-  --surface-3: #1f2432;
-  --line: #232937;
-  --line-strong: #333a4b;
+  --canvas: #000000;
+  --surface: #1c1c1e;
+  --surface-2: #2c2c2e;
+  --surface-3: #3a3a3c;
+  --fill: rgb(118 118 128 / 0.24);
+  --fill-strong: rgb(118 118 128 / 0.36);
+  --line: #2c2c2e;
+  --line-strong: #48484a;
+  --separator: rgb(84 84 88 / 0.6);
 
-  --ink: #eef0f7;
-  --ink-2: #c8ccd8;
-  --muted: #9aa1b4;
+  --ink: #f5f5f7;
+  --ink-2: #e5e5ea;
+  --muted: #98989f;
 
-  --primary: #5850ec;
-  --primary-hover: #6a63f0;
+  --primary: #0a84ff;
+  --primary-hover: #2890ff;
   --primary-fg: #ffffff;
-  --primary-text: #a9adff;
-  --primary-soft: #1c1f3f;
-  --focus: #8f94ff;
+  --primary-text: #409cff;
+  --primary-soft: #0c2440;
+  --focus: rgb(10 132 255 / 0.6);
 
-  --income: #199e70;
-  --income-ink: #4fd39c;
-  --income-soft: #11281f;
-  --expense: #e66767;
-  --expense-ink: #ff8f86;
-  --expense-soft: #311a1d;
+  --income: #30d158;
+  --income-ink: #30d158;
+  --income-soft: #0f2d18;
+  --expense: #ff453a;
+  --expense-ink: #ff6961;
+  --expense-soft: #3b1512;
 
-  --warn: #c98500;
-  --warn-ink: #f2c04e;
-  --warn-soft: #2e2512;
-  --serious: #d95926;
-  --serious-ink: #f5a27e;
-  --serious-soft: #321f17;
-  --danger: #e05252;
-  --danger-ink: #ff8f86;
-  --danger-soft: #331b1e;
+  --warn: #ffd60a;
+  --warn-ink: #ffd60a;
+  --warn-soft: #362e05;
+  --serious: #ff9f0a;
+  --serious-ink: #ffb340;
+  --serious-soft: #3a2507;
+  --danger: #ff453a;
+  --danger-ink: #ff6961;
+  --danger-soft: #3b1512;
 
-  --grid: #1e2330;
-  --axis: #8a91a5;
+  --grid: #2c2c2e;
+  --axis: #8e8e93;
 
-  --chart-1: #3987e5;
-  --chart-2: #d95926;
-  --chart-3: #199e70;
-  --chart-4: #c98500;
-  --chart-5: #d55181;
-  --chart-6: #008300;
-  --chart-7: #9085e9;
-  --chart-other: #5d6477;
+  --chart-1: #0a84ff;
+  --chart-2: #25a244;
+  --chart-3: #bf5af2;
+  --chart-4: #c47808;
+  --chart-5: #f0386b;
+  --chart-6: #6e6cf0;
+  --chart-7: #6e6cf0;
+  --chart-other: #636366;
 
-  --goal-blue: #3987e5;
-  --goal-green: #199e70;
-  --goal-orange: #d95926;
-  --goal-violet: #9085e9;
-  --goal-magenta: #d55181;
-  --goal-yellow: #c98500;
+  --goal-blue: #0a84ff;
+  --goal-green: #30d158;
+  --goal-orange: #ff9f0a;
+  --goal-violet: #bf5af2;
+  --goal-magenta: #ff375f;
+  --goal-yellow: #ffd60a;
 
-  --hero-from: #1e2252;
-  --hero-to: #12152c;
-  --hero-glow: rgb(118 110 255 / 0.5);
-  --hero-text: #ffffff;
-  --hero-muted: #c7cbf5;
+  --wallet-from: #3a3a3c;
+  --wallet-to: #121214;
 
-  --glow-1: rgb(99 102 241 / 0.16);
-  --glow-2: rgb(56 189 248 / 0.05);
-  --card-sheen: linear-gradient(180deg, rgb(255 255 255 / 0.03), rgb(255 255 255 / 0) 42%);
-  --glass: rgb(18 21 31 / 0.72);
+  --glass: rgb(44 44 46 / 0.72);
+  --glass-bar: rgb(22 22 23 / 0.78);
+  --glass-sidebar: rgb(28 28 30 / 0.82);
 
-  --shadow-card: 0 1px 2px rgb(0 0 0 / 0.35), 0 8px 24px -14px rgb(0 0 0 / 0.6);
-  --shadow-hover: 0 2px 6px rgb(0 0 0 / 0.35), 0 18px 36px -14px rgb(0 0 0 / 0.7);
-  --shadow-pop: 0 26px 52px -16px rgb(0 0 0 / 0.75), 0 6px 14px -6px rgb(0 0 0 / 0.5);
-  --shadow-primary: 0 10px 24px -10px rgb(88 80 236 / 0.8);
-  --backdrop: rgb(3 4 9 / 0.66);
+  --shadow-card: 0 0 0 transparent;
+  --shadow-hover: 0 6px 20px -8px rgb(0 0 0 / 0.6);
+  --shadow-pop: 0 14px 44px -10px rgb(0 0 0 / 0.7), 0 2px 8px rgb(0 0 0 / 0.3);
+  --shadow-primary: 0 1px 2px rgb(0 0 0 / 0.3);
+  --shadow-thumb: 0 3px 8px rgb(0 0 0 / 0.4), 0 3px 1px rgb(0 0 0 / 0.1);
+  --seg-thumb: #636366;
+  --backdrop: rgb(0 0 0 / 0.55);
+  --row-alt: rgb(255 255 255 / 0.03);
 }
 
 @theme inline {
@@ -239,8 +252,11 @@
   --color-surface: var(--surface);
   --color-surface-2: var(--surface-2);
   --color-surface-3: var(--surface-3);
+  --color-fill: var(--fill);
+  --color-fill-strong: var(--fill-strong);
   --color-line: var(--line);
   --color-line-strong: var(--line-strong);
+  --color-separator: var(--separator);
   --color-ink: var(--ink);
   --color-ink-2: var(--ink-2);
   --color-muted: var(--muted);
@@ -264,16 +280,18 @@
   --color-danger: var(--danger);
   --color-danger-ink: var(--danger-ink);
   --color-danger-soft: var(--danger-soft);
-
-  --font-sans: 'Figtree', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-  --font-display: 'Sora', 'Figtree', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
-
   --color-glass: var(--glass);
+  --color-seg-thumb: var(--seg-thumb);
+
+  /* SF Pro auf Apple-Geräten, sonst Inter als nahe Entsprechung */
+  --font-sans: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  --font-display: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif;
 
   --shadow-card: var(--shadow-card);
   --shadow-hover: var(--shadow-hover);
   --shadow-pop: var(--shadow-pop);
   --shadow-primary: var(--shadow-primary);
+  --shadow-thumb: var(--shadow-thumb);
 }
 
 @layer base {
@@ -288,22 +306,12 @@
     color: var(--ink);
     font-family: var(--font-sans);
     font-size: 15px;
-    line-height: 1.5;
+    line-height: 1.47;
+    letter-spacing: -0.006em;
+    font-feature-settings: 'cv11', 'ss01';
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     overflow-x: hidden;
-  }
-
-  /* Dezenter Farbschein im Hintergrund */
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    z-index: -1;
-    pointer-events: none;
-    background:
-      radial-gradient(900px 520px at 92% -8%, var(--glow-1), transparent 62%),
-      radial-gradient(760px 480px at 18% -12%, var(--glow-2), transparent 60%);
   }
 
   h1,
@@ -313,12 +321,12 @@
   }
 
   :focus-visible {
-    outline: 2px solid var(--focus);
-    outline-offset: 2px;
+    outline: 3px solid var(--focus);
+    outline-offset: 1px;
   }
 
   ::selection {
-    background: color-mix(in srgb, var(--primary) 22%, transparent);
+    background: color-mix(in srgb, var(--primary) 26%, transparent);
   }
 
   button:not(:disabled),
@@ -330,7 +338,7 @@
 
   input[type='date']::-webkit-calendar-picker-indicator {
     cursor: pointer;
-    opacity: 0.7;
+    opacity: 0.6;
   }
 
   :root[data-theme='dark'] input[type='date']::-webkit-calendar-picker-indicator {
@@ -339,97 +347,106 @@
 }
 
 @layer components {
+  /* Widget/Karte: weiß auf gruppiertem Hintergrund, ohne Rahmen */
   .card {
-    background: var(--card-sheen), var(--surface);
-    border: 1px solid var(--line);
-    border-radius: 22px;
+    background: var(--surface);
+    border-radius: 20px;
     box-shadow: var(--shadow-card);
   }
 
-  /* Primärer Button: einfarbiger Verlauf mit Lichtkante und farbigem Schatten */
+  /* Gruppierte Liste (inset grouped) wie in den Einstellungen */
+  .group-list {
+    background: var(--surface);
+    border-radius: 14px;
+    overflow: hidden;
+  }
+
+  /* Zeilen mit eingerückter Trennlinie (wie in iOS-Listen), Einzug über --row-inset */
+  .group-list > * + *,
+  .inset-rows > * + * {
+    position: relative;
+  }
+
+  .group-list > * + *::before,
+  .inset-rows > * + *::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: var(--row-inset, 16px);
+    height: 1px;
+    box-shadow: inset 0 0.5px 0 var(--separator);
+    pointer-events: none;
+  }
+
+  /* Überschrift über einer gruppierten Liste */
+  .group-header {
+    padding: 0 16px 6px;
+    font-size: 13px;
+    font-weight: 400;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .group-footer {
+    padding: 6px 16px 0;
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  /* Glas-Material für Leisten, Sheets und Popover */
+  .material {
+    background: var(--glass);
+    -webkit-backdrop-filter: saturate(180%) blur(24px);
+    backdrop-filter: saturate(180%) blur(24px);
+  }
+
+  /* Gefüllter Button in Systemblau */
   .btn-primary {
     color: var(--primary-fg);
-    background: linear-gradient(180deg, color-mix(in srgb, var(--primary) 86%, white) 0%, var(--primary) 100%);
-    box-shadow:
-      inset 0 1px 0 rgb(255 255 255 / 0.22),
-      inset 0 -1px 0 rgb(0 0 0 / 0.08),
-      var(--shadow-primary);
+    background: var(--primary);
+    box-shadow: var(--shadow-primary);
     transition:
-      filter 0.15s ease,
-      transform 0.15s ease,
-      box-shadow 0.2s ease;
+      background-color 0.15s ease,
+      transform 0.1s ease,
+      opacity 0.15s ease;
   }
 
   .btn-primary:hover {
-    filter: brightness(1.06);
-    box-shadow:
-      inset 0 1px 0 rgb(255 255 255 / 0.24),
-      inset 0 -1px 0 rgb(0 0 0 / 0.08),
-      0 14px 28px -12px color-mix(in srgb, var(--primary) 80%, transparent);
+    background: var(--primary-hover);
   }
 
   .btn-primary:active {
-    transform: translateY(1px);
+    transform: scale(0.98);
+    opacity: 0.9;
   }
 
-  /* Kontostand-Karte */
-  .hero-card {
-    position: relative;
-    overflow: hidden;
-    color: var(--hero-text);
-    border-radius: 24px;
-    border: 1px solid rgb(255 255 255 / 0.08);
-    background:
-      radial-gradient(120% 120% at 100% 0%, var(--hero-glow) 0%, transparent 52%),
-      radial-gradient(90% 90% at 0% 100%, rgb(56 189 248 / 0.16) 0%, transparent 55%),
-      linear-gradient(155deg, var(--hero-from) 0%, var(--hero-to) 100%);
-    box-shadow:
-      0 24px 48px -24px rgb(15 17 36 / 0.65),
-      inset 0 1px 0 rgb(255 255 255 / 0.08);
-  }
-
-  .hero-card::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    background-image:
-      linear-gradient(rgb(255 255 255 / 0.05) 1px, transparent 1px),
-      linear-gradient(90deg, rgb(255 255 255 / 0.05) 1px, transparent 1px);
-    background-size: 26px 26px;
-    mask-image: radial-gradient(ellipse 80% 70% at 85% 0%, black 0%, transparent 70%);
-  }
-
-  /* Bargeld-Karte: dunkles Grün, deutlich vom Bankkonto unterschieden */
+  /* Apple-Cash-Karte für den Bargeldbestand */
   .cash-card {
     position: relative;
     overflow: hidden;
     color: #ffffff;
-    border-radius: 24px;
-    border: 1px solid rgb(255 255 255 / 0.08);
+    border-radius: 22px;
     background:
-      radial-gradient(120% 120% at 100% 0%, rgb(27 175 122 / 0.5) 0%, transparent 55%),
-      radial-gradient(90% 90% at 0% 100%, rgb(237 161 0 / 0.14) 0%, transparent 55%),
-      linear-gradient(155deg, #11352a 0%, #0a1d17 100%);
+      radial-gradient(90% 120% at 100% 0%, rgb(255 255 255 / 0.12) 0%, transparent 55%),
+      linear-gradient(160deg, var(--wallet-from) 0%, var(--wallet-to) 100%);
     box-shadow:
-      0 24px 48px -24px rgb(8 30 22 / 0.6),
-      inset 0 1px 0 rgb(255 255 255 / 0.08);
+      0 18px 40px -22px rgb(0 0 0 / 0.55),
+      inset 0 0.5px 0 rgb(255 255 255 / 0.18);
   }
 
-  .cash-card::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    background-image: radial-gradient(rgb(255 255 255 / 0.09) 1px, transparent 1px);
-    background-size: 16px 16px;
-    mask-image: radial-gradient(ellipse 80% 70% at 85% 0%, black 0%, transparent 70%);
+  .large-title {
+    font-family: var(--font-display);
+    font-weight: 700;
+    letter-spacing: -0.028em;
+    line-height: 1.12;
   }
 
   .eyebrow {
     font-size: 12px;
     font-weight: 600;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.06em;
     text-transform: uppercase;
     color: var(--muted);
   }
@@ -444,7 +461,7 @@
     top: -60px;
     z-index: 100;
     padding: 10px 16px;
-    border-radius: 10px;
+    border-radius: 999px;
     background: var(--primary);
     color: var(--primary-fg);
     font-weight: 600;
@@ -455,36 +472,41 @@
     top: 12px;
   }
 
+  /* Eingabefeld im iOS-Stil: gefüllt, ohne Rahmen */
   .control {
     width: 100%;
     min-height: 44px;
-    border-radius: 14px;
-    border: 1px solid var(--line-strong);
-    background: var(--surface);
+    border-radius: 11px;
+    border: 1px solid transparent;
+    background: var(--fill);
     color: var(--ink);
     padding: 0 14px;
-    font-size: 15px;
+    font-size: 16px;
     transition:
-      border-color 0.15s ease,
-      box-shadow 0.15s ease;
+      background-color 0.15s ease,
+      box-shadow 0.15s ease,
+      border-color 0.15s ease;
+  }
+
+  @media (min-width: 768px) {
+    .control {
+      font-size: 15px;
+    }
   }
 
   .control::placeholder {
-    color: color-mix(in srgb, var(--muted) 80%, transparent);
+    color: color-mix(in srgb, var(--muted) 75%, transparent);
   }
 
   .control:hover {
-    border-color: color-mix(in srgb, var(--primary) 45%, var(--line-strong));
+    background: var(--fill-strong);
   }
 
   .control:focus,
-  .control:focus-visible {
-    outline: none;
-    border-color: var(--primary);
-    box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 22%, transparent);
-  }
-
+  .control:focus-visible,
   .control:focus-within {
+    outline: none;
+    background: var(--surface);
     border-color: var(--primary);
     box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 22%, transparent);
   }
@@ -492,6 +514,7 @@
   .control[aria-invalid='true'],
   .control:has([aria-invalid='true']) {
     border-color: var(--danger);
+    background: color-mix(in srgb, var(--danger) 6%, var(--surface));
   }
 
   .control[aria-invalid='true']:focus {
@@ -500,8 +523,8 @@
 
   select.control {
     appearance: none;
-    padding-right: 38px;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%238a92a3' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    padding-right: 36px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%238e8e93' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m7 10 5 5 5-5'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 12px center;
   }
@@ -513,11 +536,11 @@
   }
 }
 
-/* Dezente Animationen */
+/* Dezente Animationen (Federkurven wie bei iOS) */
 @keyframes page-in {
   from {
     opacity: 0;
-    transform: translateY(6px);
+    transform: translateY(8px);
   }
   to {
     opacity: 1;
@@ -537,7 +560,7 @@
 @keyframes pop-in {
   from {
     opacity: 0;
-    transform: translateY(12px) scale(0.98);
+    transform: scale(1.08);
   }
   to {
     opacity: 1;
@@ -556,9 +579,11 @@
 
 @keyframes drawer-in {
   from {
-    transform: translateX(-100%);
+    opacity: 0;
+    transform: translateY(24px) scale(0.98);
   }
   to {
+    opacity: 1;
     transform: none;
   }
 }
@@ -566,7 +591,7 @@
 @keyframes toast-in {
   from {
     opacity: 0;
-    transform: translateY(10px) scale(0.97);
+    transform: translateY(-16px) scale(0.96);
   }
   to {
     opacity: 1;
@@ -588,7 +613,7 @@
     transform: scale(0.6);
   }
   60% {
-    transform: scale(1.15);
+    transform: scale(1.12);
   }
   100% {
     transform: scale(1);
@@ -596,32 +621,32 @@
 }
 
 @utility animate-page {
-  animation: page-in 0.28s ease-out both;
+  animation: page-in 0.32s cubic-bezier(0.25, 0.9, 0.3, 1) both;
 }
 
 @utility animate-fade {
-  animation: fade-in 0.18s ease-out both;
+  animation: fade-in 0.2s ease-out both;
 }
 
 @utility animate-pop {
-  animation: pop-in 0.22s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  animation: pop-in 0.22s cubic-bezier(0.25, 0.9, 0.3, 1) both;
 }
 
 @utility animate-sheet {
-  animation: sheet-in 0.26s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  animation: sheet-in 0.38s cubic-bezier(0.2, 0.9, 0.25, 1) both;
 }
 
 @utility animate-drawer {
-  animation: drawer-in 0.24s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  animation: drawer-in 0.3s cubic-bezier(0.2, 0.9, 0.25, 1) both;
 }
 
 @utility animate-toast {
-  animation: toast-in 0.24s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  animation: toast-in 0.36s cubic-bezier(0.2, 0.9, 0.25, 1.15) both;
 }
 
 @utility animate-grow {
   transform-origin: left center;
-  animation: grow-x 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  animation: grow-x 0.8s cubic-bezier(0.2, 0.9, 0.25, 1) both;
 }
 
 @utility animate-badge {

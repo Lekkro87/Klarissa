@@ -17,18 +17,18 @@ export function Field({ id, label, error, hint, optional = false, children, clas
   const { t } = useI18n();
   return (
     <div className={`flex min-w-0 flex-col gap-1.5 ${className}`}>
-      <label htmlFor={id} className="text-sm font-semibold text-ink-2">
+      <label htmlFor={id} className="pl-1 text-[13px] font-medium text-muted">
         {label}
-        {optional && <span className="ml-1.5 font-normal text-muted">({t.common.optional})</span>}
+        {optional && <span className="ml-1.5 font-normal text-muted/80">({t.common.optional})</span>}
       </label>
       {children}
       {error ? (
-        <p id={`${id}-error`} className="flex items-start gap-1.5 text-sm font-medium text-danger-ink">
+        <p id={`${id}-error`} className="flex items-start gap-1.5 pl-1 text-[13px] font-medium text-danger-ink">
           <CircleAlert className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
           {error}
         </p>
       ) : hint ? (
-        <p id={`${id}-hint`} className="text-[13px] text-muted">
+        <p id={`${id}-hint`} className="pl-1 text-[13px] text-muted">
           {hint}
         </p>
       ) : null}

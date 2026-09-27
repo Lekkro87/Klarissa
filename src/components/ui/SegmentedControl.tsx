@@ -19,7 +19,7 @@ interface SegmentedControlProps<T extends string> {
   mobileSelect?: boolean;
 }
 
-/** Barrierefreie Auswahl als Radiogruppe (Pfeiltasten wechseln die Auswahl). */
+/** Segmentsteuerung im iOS-Stil – barrierefrei als Radiogruppe (Pfeiltasten). */
 export function SegmentedControl<T extends string>({
   value,
   onChange,
@@ -57,7 +57,7 @@ export function SegmentedControl<T extends string>({
     <div
       role="radiogroup"
       aria-label={label}
-      className={`max-w-full rounded-full border border-line bg-surface-2 p-1 ${display} ${className}`}
+      className={`max-w-full rounded-[10px] bg-fill p-[2px] ${display} ${className}`}
     >
       {options.map((option, index) => {
         const selected = option.value === value;
@@ -74,12 +74,10 @@ export function SegmentedControl<T extends string>({
             tabIndex={selected ? 0 : -1}
             onClick={() => onChange(option.value)}
             onKeyDown={(event) => onKeyDown(event, index)}
-            className={`inline-flex min-w-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-full font-semibold transition-all duration-200 ${
-              size === 'sm' ? 'h-8 px-3.5 text-[13px]' : 'h-10 px-4 text-sm'
+            className={`inline-flex min-w-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-[8px] transition-all duration-200 ${
+              size === 'sm' ? 'h-7 px-3 text-[13px]' : 'h-8 px-4 text-[14px]'
             } ${fullWidth ? 'flex-1' : ''} ${
-              selected
-                ? 'bg-surface text-ink shadow-[0_1px_2px_rgb(18_19_26/0.08),0_2px_8px_-2px_rgb(18_19_26/0.1)] ring-1 ring-line'
-                : 'text-muted hover:text-ink'
+              selected ? 'bg-seg-thumb font-semibold text-ink shadow-thumb' : 'font-medium text-ink-2 hover:text-ink'
             }`}
           >
             {Icon && <Icon className="size-4 shrink-0" aria-hidden="true" />}

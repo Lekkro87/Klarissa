@@ -6,7 +6,7 @@ Klarissa ist eine moderne, vollständig funktionsfähige Budget-Tracker-Webanwen
 
 - **Einrichtung beim ersten Start**: Du gibst deinen aktuellen Kontostand an (Pflicht, auch negativ möglich), wählst die Währung und optional deinen Namen. Danach startest du mit deinen eigenen Daten oder mit Beispieldaten zum Ausprobieren. Der Kontostand ergibt sich aus Startguthaben + Einnahmen − Ausgaben und lässt sich in den Einstellungen jederzeit korrigieren.
 - **Dashboard**: Kontostand, Einnahmen, Ausgaben und Sparquote mit Vergleich zum Vormonat, Diagramm „Einnahmen & Ausgaben“ (6 oder 12 Monate), Ausgaben nach Kategorie, Monatsvergleich, Budgetübersicht, letzte Transaktionen und Sparziele. Alle Werte werden live aus den gespeicherten Daten berechnet.
-- **Transaktionen**: Einnahmen und Ausgaben hinzufügen, bearbeiten und löschen (mit Bestätigung und „Rückgängig“). Suche nach Beschreibung, Kategorie, Zahlungsmethode oder Betrag. Die Filter für Zeitraum (inkl. benutzerdefiniert), Typ, Kategorie und Zahlungsmethode lassen sich kombinieren. Sortierung nach Datum oder Betrag. Auf Mobilgeräten erscheint eine Kartenansicht, bei vielen Einträgen eine Seitennavigation.
+- **Transaktionen**: Einnahmen und Ausgaben hinzufügen, bearbeiten und löschen (mit Bestätigung und „Rückgängig“). Suche nach Beschreibung, Kategorie, Zahlungsmethode oder Betrag. Die Filter für Zeitraum (inkl. benutzerdefiniert), Typ, Kategorie und Zahlungsmethode lassen sich kombinieren. Sortierung nach Datum oder Betrag. Am Desktop erscheint eine Tabelle wie in macOS, auf dem Smartphone eine nach Tagen gruppierte iOS-Liste: Tippen öffnet die Bearbeitung, Wischen nach links zeigt „Löschen“. Bei vielen Einträgen gibt es eine Seitennavigation.
 - **Budget**: Monatliche Budgets pro Kategorie plus ein Monatsbudget. Fortschrittsbalken und dezente Warnungen bei 75 %, 90 %, 100 % und bei Überschreitung (auch als Hinweis direkt beim Erfassen einer Ausgabe und in der Benachrichtigungsglocke). Budgets lassen sich aus dem Vormonat übernehmen.
 - **Statistiken**: Zeiträume 7 Tage, 30 Tage, 6 und 12 Monate. Verlauf der Einnahmen, der Ausgaben und des Kontostands, Donut-Diagramme nach Kategorie, größte Ausgaben sowie durchschnittliche monatliche und tägliche Ausgaben.
 - **Bargeld**: Scheine und Münzen zählen (Stückelungen passend zur gewählten Währung), mit Plus/Minus oder direkter Eingabe. Der Bargeldbestand wird getrennt vom Bankkonto geführt und nicht zum Kontostand gezählt. Transaktionen mit der Zahlungsmethode „Bargeld“ verändern den Kontostand ebenfalls nicht; die Barzahlungen des Monats werden auf der Bargeld-Seite zusammengefasst.
@@ -14,6 +14,8 @@ Klarissa ist eine moderne, vollständig funktionsfähige Budget-Tracker-Webanwen
 - **Einstellungen**: Name, Kontostand korrigieren, Währung (EUR, USD, GBP, CHF), Erscheinungsbild (Hell, Dunkel, System), Sprache (Deutsch, Englisch), Datenexport und -import (JSON), Demo-Daten zurücksetzen, alle Daten löschen.
 
 Weitere Eigenschaften:
+
+- **Design im Apple-Stil (iOS/macOS)**: Systemfarben und -schrift (SF Pro auf Apple-Geräten, sonst Inter), große Seitentitel, gruppierte Listen wie in den Einstellungen, Widgets im Stil von Aktien- und Health-App, Aktivitätsringe für Budget und Sparziele, eine Apple-Cash-Karte für das Bargeld, Sheets mit „Abbrechen“/„Sichern“ in der Titelleiste, iOS-Hinweisdialoge und Banner-Mitteilungen. Am Desktop gibt es eine Seitenleiste wie in macOS, auf Smartphone und Tablet eine schwebende Tab-Leiste aus Glas mit „Mehr“-Menü und eine Navigationsleiste, die beim Scrollen einen kleinen Titel zeigt. Hell- und Dunkelmodus nutzen die jeweiligen Apple-Farbpaletten.
 
 - Kategorien für Einnahmen (z. B. Gehalt, Nebenjob) und Ausgaben (z. B. Wohnen, Lebensmittel, Restaurants, Transport)
 - Optionale, realistische Beispieldaten der letzten 12 Monate
@@ -63,7 +65,7 @@ src/
   i18n/                   Texte auf Deutsch und Englisch
   pages/                  Dashboard, Transaktionen, Budget, Statistiken, Sparziele, Einstellungen
   components/
-    layout/               Sidebar, mobiles Menü, Header mit Suche und Benachrichtigungen
+    layout/               Seitenleiste, Tab-Leiste mit „Mehr“-Sheet, Navigationsleiste mit Suche und Mitteilungen
     transactions/         Formular-Modal, Filterleiste, Liste/Tabelle
     budget/               Budgetkarten, Budget-Modal, Warntexte
     goals/                Sparziel-Karten und -Dialoge

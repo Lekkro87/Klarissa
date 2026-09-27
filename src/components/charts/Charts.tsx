@@ -40,13 +40,13 @@ interface ChartTooltipProps {
 
 export function ChartTooltipBox({ title, rows }: { title?: string; rows: NonNullable<ChartTooltipProps['rows']> }) {
   return (
-    <div className="min-w-44 rounded-2xl border border-line bg-glass px-3.5 py-2.5 text-sm shadow-pop backdrop-blur-xl">
-      {title && <p className="mb-1.5 font-semibold text-ink">{title}</p>}
-      <ul className="space-y-1">
+    <div className="material min-w-44 rounded-[12px] px-3 py-2.5 text-[13px] shadow-pop ring-[0.5px] ring-[var(--separator)]">
+      {title && <p className="mb-1 text-[12px] font-semibold uppercase tracking-[0.02em] text-muted">{title}</p>}
+      <ul className="space-y-0.5">
         {rows.map((row) => (
           <li key={row.label} className="flex items-center justify-between gap-4">
-            <span className="flex items-center gap-2 text-ink-2">
-              {row.color && <span className="size-2.5 rounded-[3px]" style={{ background: row.color }} aria-hidden="true" />}
+            <span className="flex items-center gap-1.5 text-ink-2">
+              {row.color && <span className="size-2 rounded-full" style={{ background: row.color }} aria-hidden="true" />}
               {row.label}
             </span>
             <span className={`num ${row.strong ? 'font-bold' : 'font-semibold'} text-ink`}>{row.value}</span>
@@ -57,7 +57,7 @@ export function ChartTooltipBox({ title, rows }: { title?: string; rows: NonNull
   );
 }
 
-const axisTick = { fill: 'var(--axis)', fontSize: 12 };
+const axisTick = { fill: 'var(--axis)', fontSize: 11 };
 
 /* ------------------------------------------------------------------ */
 /* Einnahmen vs. Ausgaben (Balken)                                     */
@@ -82,22 +82,12 @@ export function IncomeExpenseChart({ data, height = 280 }: { data: IncomeExpense
   return (
     <div role="img" aria-label={`${t.dashboard.incomeVsExpenses}. ${summary}`}>
       <ResponsiveContainer width="100%" height={height}>
-        <BarChart data={data} barGap={4} barCategoryGap="28%" margin={{ top: 8, right: 4, bottom: 0, left: 0 }}>
-          <defs>
-            <linearGradient id="bar-income" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="var(--income)" stopOpacity={1} />
-              <stop offset="100%" stopColor="var(--income)" stopOpacity={0.55} />
-            </linearGradient>
-            <linearGradient id="bar-expense" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="var(--expense)" stopOpacity={1} />
-              <stop offset="100%" stopColor="var(--expense)" stopOpacity={0.55} />
-            </linearGradient>
-          </defs>
-          <CartesianGrid vertical={false} stroke="var(--grid)" strokeDasharray="0" />
-          <XAxis dataKey="label" tickLine={false} axisLine={{ stroke: 'var(--line-strong)' }} tick={axisTick} tickMargin={10} />
-          <YAxis tickFormatter={f.axisMoney} tickLine={false} axisLine={false} tick={axisTick} width={72} />
+        <BarChart data={data} barGap={3} barCategoryGap="30%" margin={{ top: 8, right: 0, bottom: 0, left: 4 }}>
+          <CartesianGrid vertical={false} stroke="var(--grid)" />
+          <XAxis dataKey="label" tickLine={false} axisLine={{ stroke: 'var(--line-strong)' }} tick={axisTick} tickMargin={8} />
+          <YAxis orientation="right" tickFormatter={f.axisMoney} tickLine={false} axisLine={false} tick={axisTick} width={68} />
           <Tooltip
-            cursor={{ fill: 'var(--surface-3)', opacity: 0.55, radius: 10 } as object}
+            cursor={{ fill: 'var(--fill)', radius: 6 } as object}
             content={({ active, payload }) => {
               if (!active || !payload?.length) return null;
               const point = payload[0].payload as IncomeExpenseDatum;
@@ -113,8 +103,8 @@ export function IncomeExpenseChart({ data, height = 280 }: { data: IncomeExpense
               );
             }}
           />
-          <Bar dataKey="income" name={t.common.income} fill="url(#bar-income)" radius={[6, 6, 0, 0]} maxBarSize={22} animationDuration={600} />
-          <Bar dataKey="expense" name={t.common.expenses} fill="url(#bar-expense)" radius={[6, 6, 0, 0]} maxBarSize={22} animationDuration={600} />
+          <Bar dataKey="income" name={t.common.income} fill="var(--income)" radius={[4, 4, 0, 0]} maxBarSize={18} animationDuration={600} />
+          <Bar dataKey="expense" name={t.common.expenses} fill="var(--expense)" radius={[4, 4, 0, 0]} maxBarSize={18} animationDuration={600} />
         </BarChart>
       </ResponsiveContainer>
     </div>
@@ -152,10 +142,10 @@ export function TrendChart({ data, color, name, height = 240, emptyText, allowZe
   return (
     <div role="img" aria-label={`${name}. ${summary}`}>
       <ResponsiveContainer width="100%" height={height}>
-        <AreaChart data={data} margin={{ top: 8, right: 8, bottom: 0, left: 0 }}>
+        <AreaChart data={data} margin={{ top: 8, right: 0, bottom: 0, left: 8 }}>
           <defs>
             <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor={color} stopOpacity={0.28} />
+              <stop offset="0%" stopColor={color} stopOpacity={0.22} />
               <stop offset="100%" stopColor={color} stopOpacity={0} />
             </linearGradient>
           </defs>
@@ -165,11 +155,11 @@ export function TrendChart({ data, color, name, height = 240, emptyText, allowZe
             tickLine={false}
             axisLine={{ stroke: 'var(--line-strong)' }}
             tick={axisTick}
-            tickMargin={10}
+            tickMargin={8}
             interval={dense ? 'preserveStartEnd' : 0}
             minTickGap={dense ? 18 : 4}
           />
-          <YAxis tickFormatter={f.axisMoney} tickLine={false} axisLine={false} tick={axisTick} width={72} />
+          <YAxis orientation="right" tickFormatter={f.axisMoney} tickLine={false} axisLine={false} tick={axisTick} width={68} />
           <Tooltip
             cursor={{ stroke: 'var(--line-strong)', strokeWidth: 1 }}
             content={({ active, payload }) => {
@@ -183,7 +173,7 @@ export function TrendChart({ data, color, name, height = 240, emptyText, allowZe
             dataKey="value"
             name={name}
             stroke={color}
-            strokeWidth={2.5}
+            strokeWidth={2.25}
             fill={`url(#${gradientId})`}
             dot={false}
             activeDot={{ r: 5, strokeWidth: 2, stroke: 'var(--surface)', fill: color }}
@@ -275,8 +265,8 @@ export function CategoryDonut({ items, total, title, emptyText, compact = false 
               outerRadius="100%"
               startAngle={90}
               endAngle={-270}
-              paddingAngle={items.length > 1 ? 2.5 : 0}
-              cornerRadius={6}
+              paddingAngle={items.length > 1 ? 2 : 0}
+              cornerRadius={4}
               stroke="none"
               onMouseEnter={(_, index) => setActive(index)}
               onMouseLeave={() => setActive(null)}
@@ -295,8 +285,8 @@ export function CategoryDonut({ items, total, title, emptyText, compact = false 
         </ResponsiveContainer>
         <div className="pointer-events-none absolute inset-0 grid place-items-center">
           <div className="max-w-[64%] text-center">
-            <p className="truncate text-xs font-medium text-muted">{activeItem ? activeItem.label : t.common.total}</p>
-            <p className="num font-display text-base font-semibold leading-tight tracking-[-0.02em] text-ink sm:text-lg">
+            <p className="truncate text-[12px] font-medium text-muted">{activeItem ? activeItem.label : t.common.total}</p>
+            <p className="num font-display text-[17px] font-semibold leading-tight tracking-[-0.02em] text-ink sm:text-[19px]">
               {f.money(activeItem ? activeItem.amount : total)}
             </p>
             {activeItem && <p className="num text-xs font-semibold text-muted">{f.percent(activeItem.share)}</p>}
@@ -304,17 +294,17 @@ export function CategoryDonut({ items, total, title, emptyText, compact = false 
         </div>
       </div>
 
-      <ul className="w-full min-w-0 flex-1 space-y-1">
+      <ul className="inset-rows w-full min-w-0 flex-1 [--row-inset:26px]">
         {items.map((item, index) => (
           <li key={item.key}>
             <div
-              className={`flex items-center gap-3 rounded-xl px-2.5 py-2 transition-colors ${active === index ? 'bg-surface-2' : ''}`}
+              className={`flex min-h-11 items-center gap-3 py-2 transition-opacity duration-150 ${active !== null && active !== index ? 'opacity-45' : ''}`}
               onMouseEnter={() => setActive(index)}
               onMouseLeave={() => setActive(null)}
             >
-              <span className="size-3 shrink-0 rounded-full ring-2 ring-[var(--surface)]" style={{ background: item.color, boxShadow: `0 0 0 3px color-mix(in srgb, ${item.color} 22%, transparent)` }} aria-hidden="true" />
-              <span className="min-w-0 flex-1 truncate text-sm font-medium text-ink-2">{item.label}</span>
-              <span className="num text-sm font-semibold text-ink">{f.money(item.amount)}</span>
+              <span className="size-2.5 shrink-0 rounded-full" style={{ background: item.color }} aria-hidden="true" />
+              <span className="min-w-0 flex-1 truncate text-[15px] text-ink">{item.label}</span>
+              <span className="num text-[15px] font-semibold text-ink">{f.money(item.amount)}</span>
               <span className="num w-14 text-right text-[13px] text-muted">{f.percent(item.share)}</span>
             </div>
           </li>

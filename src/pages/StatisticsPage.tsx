@@ -188,7 +188,7 @@ export function StatisticsPage() {
         {stats.largest.length === 0 ? (
           <EmptyState compact icon={Receipt} title={t.statistics.noExpenses} />
         ) : (
-          <ol className="divide-y divide-line px-2 pb-2 sm:px-3 sm:pb-3">
+          <ol className="inset-rows pb-2 [--row-inset:96px] sm:[--row-inset:100px]">
             {stats.largest.map((tx, index) => {
               const title = titleOf(tx);
               return (
@@ -197,12 +197,12 @@ export function StatisticsPage() {
                     type="button"
                     onClick={() => ui.openTransaction(tx)}
                     aria-label={`${index + 1}. ${t.transactions.editLabel(title)}`}
-                    className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left transition-colors hover:bg-surface-2"
+                    className="flex w-full items-center gap-3 px-4 py-2.5 text-left transition-colors hover:bg-fill active:bg-fill-strong sm:px-5"
                   >
-                    <span className="num w-6 shrink-0 text-center font-display text-sm font-semibold text-muted">{index + 1}</span>
+                    <span className="num w-6 shrink-0 text-center text-[15px] font-semibold text-muted">{index + 1}</span>
                     <CategoryBubble category={tx.category} type={tx.type} />
                     <span className="min-w-0 flex-1">
-                      <span className={`block truncate font-semibold ${tx.description ? 'text-ink' : 'text-muted'}`}>{title}</span>
+                      <span className={`block truncate text-[15px] font-medium ${tx.description ? 'text-ink' : 'text-muted'}`}>{title}</span>
                       <span className="block truncate text-[13px] text-muted">
                         {t.categories[tx.category]} · {f.date(tx.date)}
                       </span>

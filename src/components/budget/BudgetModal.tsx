@@ -4,7 +4,6 @@ import type { YearMonth } from '../../lib/dates';
 import { amountToInput, parseAmount } from '../../lib/money';
 import { useActions, useData, useI18n } from '../../state/store';
 import type { Budget, ExpenseCategory } from '../../types';
-import { Button } from '../ui/Button';
 import { Field, fieldAria } from '../ui/Field';
 import { Modal } from '../ui/Modal';
 import { useToast } from '../ui/Toast';
@@ -37,16 +36,7 @@ export function BudgetModal({ mode, ym, onClose }: BudgetModalProps) {
       size="sm"
       title={title}
       description={t.budget.validFor(f.monthYear(ym))}
-      footer={
-        <>
-          <Button variant="secondary" onClick={onClose}>
-            {t.common.cancel}
-          </Button>
-          <Button type="submit" form={formId}>
-            {t.common.save}
-          </Button>
-        </>
-      }
+      confirm={{ label: t.form.saveShort, form: formId }}
     >
       {mode && <BudgetForm formId={formId} mode={mode} ym={ym} onDone={onClose} />}
     </Modal>
@@ -136,8 +126,8 @@ function BudgetForm({ formId, mode, ym, onDone }: { formId: string; mode: Budget
         </Field>
       )}
       <Field id={`${id}-amount`} label={t.budget.budgetAmount} error={submitted ? amountError : null}>
-        <div className="control flex h-14 items-center gap-2 px-4">
-          <span className="text-lg font-semibold text-muted" aria-hidden="true">
+        <div className="control flex h-16 items-center gap-2 px-4">
+          <span className="text-[22px] font-semibold text-muted" aria-hidden="true">
             {f.currencySymbol}
           </span>
           <input
@@ -149,11 +139,11 @@ function BudgetForm({ formId, mode, ym, onDone }: { formId: string; mode: Budget
             placeholder={t.form.amountPlaceholder}
             value={amount}
             onChange={(event) => setAmount(event.target.value.slice(0, 20))}
-            className="num h-full w-full min-w-0 bg-transparent font-display text-xl font-semibold text-ink outline-none placeholder:text-line-strong"
+            className="num h-full w-full min-w-0 bg-transparent font-display text-[28px] font-semibold tracking-[-0.02em] text-ink outline-none placeholder:text-muted/40"
           />
         </div>
       </Field>
-      {mode.kind === 'total' && <p className="text-sm text-muted">{t.budget.explicitHint}</p>}
+      {mode.kind === 'total' && <p className="pl-1 text-[13px] text-muted">{t.budget.explicitHint}</p>}
       <button type="submit" className="hidden" tabIndex={-1} aria-hidden="true" />
     </form>
   );

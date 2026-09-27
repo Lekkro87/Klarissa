@@ -36,17 +36,17 @@ export function FilterBar({ filters, onChange }: FilterBarProps) {
   const showExpenseCategories = filters.type !== 'income';
 
   return (
-    <Card padded={false} className="p-4 sm:p-5" aria-label={t.transactions.filters.title}>
-      <div className="flex flex-col gap-3 md:flex-row md:items-center">
+    <Card padded={false} className="p-3 sm:p-4" aria-label={t.transactions.filters.title}>
+      <div className="flex flex-col gap-2.5 md:flex-row md:items-center">
         <div className="relative min-w-0 flex-1">
           <label htmlFor={`${id}-search`} className="sr-only">
             {t.transactions.filters.search}
           </label>
-          <Search className="pointer-events-none absolute left-3.5 top-1/2 size-[18px] -translate-y-1/2 text-muted" aria-hidden="true" />
+          <Search className="pointer-events-none absolute left-3 top-1/2 size-[17px] -translate-y-1/2 text-muted" aria-hidden="true" strokeWidth={2.2} />
           <input
             id={`${id}-search`}
             type="search"
-            className="control pl-10 pr-10"
+            className="control rounded-[10px] pl-9 pr-10"
             placeholder={t.transactions.filters.searchPlaceholder}
             value={filters.query}
             autoComplete="off"
@@ -56,11 +56,13 @@ export function FilterBar({ filters, onChange }: FilterBarProps) {
             <button
               type="button"
               onClick={() => onChange({ query: '' })}
-              className="absolute right-2 top-1/2 grid size-8 -translate-y-1/2 place-items-center rounded-lg text-muted hover:bg-surface-3 hover:text-ink"
+              className="group absolute right-1.5 top-1/2 grid size-8 -translate-y-1/2 place-items-center rounded-full"
               aria-label={t.transactions.filters.clearSearch}
               title={t.transactions.filters.clearSearch}
             >
-              <X className="size-4" aria-hidden="true" />
+              <span className="grid size-[18px] place-items-center rounded-full bg-muted/60 text-surface transition-colors group-hover:bg-muted" aria-hidden="true">
+                <X className="size-3" strokeWidth={3} />
+              </span>
             </button>
           )}
         </div>
@@ -75,7 +77,7 @@ export function FilterBar({ filters, onChange }: FilterBarProps) {
           >
             {expanded ? t.transactions.filters.hideFilters : t.transactions.filters.showFilters}
             {active > 0 && (
-              <span className="num ml-1 rounded-full bg-primary px-1.5 text-xs font-bold leading-5 text-primary-fg">
+              <span className="num ml-1 rounded-full bg-primary px-1.5 text-[12px] font-semibold leading-5 text-primary-fg">
                 {active}
               </span>
             )}
@@ -85,7 +87,7 @@ export function FilterBar({ filters, onChange }: FilterBarProps) {
           </label>
           <select
             id={`${id}-sort`}
-            className="control flex-1 md:w-52 md:flex-none"
+            className="control flex-1 rounded-[10px] md:w-52 md:flex-none"
             value={filters.sort}
             onChange={(event) => onChange({ sort: event.target.value as SortKey })}
           >
@@ -103,7 +105,7 @@ export function FilterBar({ filters, onChange }: FilterBarProps) {
         className={`${expanded ? 'grid' : 'hidden'} mt-4 gap-4 md:grid md:grid-cols-2 xl:grid-cols-[1fr_1.55fr_1fr_1fr]`}
       >
         <div className="flex min-w-0 flex-col gap-1.5">
-          <label htmlFor={`${id}-period`} className="text-[13px] font-semibold text-muted">
+          <label htmlFor={`${id}-period`} className="px-1 text-[13px] text-muted">
             {t.transactions.filters.period}
           </label>
           <select
@@ -121,7 +123,7 @@ export function FilterBar({ filters, onChange }: FilterBarProps) {
         </div>
 
         <div className="flex min-w-0 flex-col gap-1.5">
-          <span id={`${id}-type-label`} className="text-[13px] font-semibold text-muted">
+          <span id={`${id}-type-label`} className="px-1 text-[13px] text-muted">
             {t.transactions.filters.type}
           </span>
           <SegmentedControl
@@ -136,7 +138,7 @@ export function FilterBar({ filters, onChange }: FilterBarProps) {
         </div>
 
         <div className="flex min-w-0 flex-col gap-1.5">
-          <label htmlFor={`${id}-category`} className="text-[13px] font-semibold text-muted">
+          <label htmlFor={`${id}-category`} className="px-1 text-[13px] text-muted">
             {t.transactions.filters.category}
           </label>
           <select
@@ -168,7 +170,7 @@ export function FilterBar({ filters, onChange }: FilterBarProps) {
         </div>
 
         <div className="flex min-w-0 flex-col gap-1.5">
-          <label htmlFor={`${id}-payment`} className="text-[13px] font-semibold text-muted">
+          <label htmlFor={`${id}-payment`} className="px-1 text-[13px] text-muted">
             {t.transactions.filters.paymentMethod}
           </label>
           <select
@@ -190,7 +192,7 @@ export function FilterBar({ filters, onChange }: FilterBarProps) {
         {filters.period === 'custom' && (
           <div className="grid gap-4 sm:grid-cols-2 md:col-span-2">
             <div className="flex min-w-0 flex-col gap-1.5">
-              <label htmlFor={`${id}-from`} className="text-[13px] font-semibold text-muted">
+              <label htmlFor={`${id}-from`} className="px-1 text-[13px] text-muted">
                 {t.transactions.filters.from}
               </label>
               <input
@@ -205,7 +207,7 @@ export function FilterBar({ filters, onChange }: FilterBarProps) {
               />
             </div>
             <div className="flex min-w-0 flex-col gap-1.5">
-              <label htmlFor={`${id}-to`} className="text-[13px] font-semibold text-muted">
+              <label htmlFor={`${id}-to`} className="px-1 text-[13px] text-muted">
                 {t.transactions.filters.to}
               </label>
               <input
@@ -229,8 +231,8 @@ export function FilterBar({ filters, onChange }: FilterBarProps) {
       </div>
 
       {active > 0 && (
-        <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-line pt-3">
-          <span className="text-sm text-muted">{t.transactions.filters.active(active)}</span>
+        <div className="-mx-3 -mb-3 mt-4 flex flex-wrap items-center justify-between gap-2 px-4 py-2 shadow-[inset_0_0.5px_0_var(--separator)] sm:-mx-4 sm:-mb-4">
+          <span className="text-[13px] text-muted">{t.transactions.filters.active(active)}</span>
           <Button
             variant="ghost"
             size="sm"

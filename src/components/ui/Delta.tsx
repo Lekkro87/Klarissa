@@ -1,5 +1,3 @@
-import { ArrowDownRight, ArrowUpRight, Minus } from 'lucide-react';
-
 interface DeltaProps {
   /** Veränderung – Vorzeichen bestimmt die Richtung */
   value: number;
@@ -9,21 +7,24 @@ interface DeltaProps {
   upIsGood?: boolean;
 }
 
-/** Kleiner Indikator für positive/negative Veränderungen (Farbe + Pfeil + Text). */
+/** Veränderungsanzeige wie in der Aktien- und Health-App (Dreieck + Wert). */
 export function Delta({ value, text, upIsGood = true }: DeltaProps) {
   const rounded = Math.round(value * 10) / 10;
   const direction = rounded > 0 ? 'up' : rounded < 0 ? 'down' : 'flat';
   const good = direction === 'flat' ? null : (direction === 'up') === upIsGood;
-  const Icon = direction === 'up' ? ArrowUpRight : direction === 'down' ? ArrowDownRight : Minus;
   const tone =
     good === null
-      ? 'bg-surface-3 text-ink-2'
+      ? 'bg-fill text-ink-2'
       : good
         ? 'bg-income-soft text-income-ink'
         : 'bg-expense-soft text-expense-ink';
   return (
-    <span className={`num inline-flex items-center gap-0.5 rounded-full px-2 py-0.5 text-xs font-semibold ${tone}`}>
-      <Icon className="size-3.5" aria-hidden="true" strokeWidth={2.5} />
+    <span className={`num inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[12px] font-semibold ${tone}`}>
+      {direction !== 'flat' && (
+        <svg viewBox="0 0 10 10" className={`size-2 ${direction === 'down' ? 'rotate-180' : ''}`} aria-hidden="true">
+          <path d="M5 1.2 9.2 8.6H.8Z" fill="currentColor" />
+        </svg>
+      )}
       {text}
     </span>
   );

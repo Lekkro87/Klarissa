@@ -1,4 +1,3 @@
-import { X } from 'lucide-react';
 import { type ReactNode, type RefObject, useEffect, useId, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useI18n } from '../../state/store';
@@ -27,37 +26,13 @@ function unlockScroll() {
   }
 }
 
-export interface ModalProps {
-  open: boolean;
-  onClose: () => void;
-  title: string;
-  description?: ReactNode;
-  children?: ReactNode;
-  footer?: ReactNode;
-  size?: 'sm' | 'md' | 'lg';
-  role?: 'dialog' | 'alertdialog';
-  initialFocusRef?: RefObject<HTMLElement | null>;
-  icon?: ReactNode;
-}
-
-const WIDTHS = { sm: 'sm:max-w-md', md: 'sm:max-w-lg', lg: 'sm:max-w-2xl' };
-
-export function Modal({
-  open,
-  onClose,
-  title,
-  description,
-  children,
-  footer,
-  size = 'md',
-  role = 'dialog',
-  initialFocusRef,
-  icon,
-}: ModalProps) {
-  const { t } = useI18n();
-  const panelRef = useRef<HTMLDivElement>(null);
-  const titleId = useId();
-  const descriptionId = useId();
+/** Hält den Fokus im Dialog und schließt ihn mit Escape. */
+export function useDialogBehavior(
+  open: boolean,
+  panelRef: RefObject<HTMLElement | null>,
+  onClose: () => void,
+  initialFocusRef?: RefObject<HTMLElement | null>,
+) {
   const stackId = useId();
   const onCloseRef = useRef(onClose);
   onCloseRef.current = onClose;
@@ -83,8 +58,9 @@ export function Modal({
         onCloseRef.current();
         return;
       }
-      if (event.key !== 'Tab' || !panelRef.current) return;
-      const focusable = Array.from(panelRef.current.querySelectorAll<HTMLElement>(FOCUSABLE)).filter(
+      const panel = panelRef.current;
+      if (event.key !== 'Tab' || !panel) return;
+      const focusable = Array.from(panel.querySelectorAll<HTMLElement>(FOCUSABLE)).filter(
         (element) => element.offsetParent !== null || element === document.activeElement,
       );
       if (focusable.length === 0) {
@@ -94,13 +70,13 @@ export function Modal({
       const first = focusable[0];
       const last = focusable[focusable.length - 1];
       const active = document.activeElement;
-      if (event.shiftKey && (active === first || active === panelRef.current)) {
+      if (event.shiftKey && (active === first || active === panel)) {
         event.preventDefault();
         last.focus();
       } else if (!event.shiftKey && active === last) {
         event.preventDefault();
         first.focus();
-      } else if (!panelRef.current.contains(active)) {
+      } else if (!panel.contains(active)) {
         event.preventDefault();
         first.focus();
       }
@@ -115,55 +91,107 @@ export function Modal({
       unlockScroll();
       if (previouslyFocused && document.contains(previouslyFocused)) previouslyFocused.focus({ preventScroll: true });
     };
-  }, [open, stackId, initialFocusRef]);
+  }, [open, stackId, panelRef, initialFocusRef]);
+}
+
+export interface ModalConfirm {
+  label: string;
+  /** ID eines Formulars, das beim Klick abgeschickt wird */
+  form?: string;
+  onClick?: () => void;
+  disabled?: boolean;
+}
+
+export interface ModalProps {
+  open: boolean;
+  onClose: () => void;
+  title: string;
+  description?: ReactNode;
+  children?: ReactNode;
+  /** Primäraktion rechts in der Titelleiste (z. B. „Sichern“) */
+  confirm?: ModalConfirm;
+  cancelLabel?: string;
+  /** Zusätzlicher Bereich unter dem Inhalt (z. B. „Löschen“) */
+  footer?: ReactNode;
+  size?: 'sm' | 'md' | 'lg';
+  initialFocusRef?: RefObject<HTMLElement | null>;
+}
+
+const WIDTHS = { sm: 'sm:max-w-md', md: 'sm:max-w-lg', lg: 'sm:max-w-2xl' };
+
+/**
+ * Sheet im iOS-Stil: Titelleiste mit „Abbrechen“ links, Titel in der Mitte
+ * und der Hauptaktion rechts. Auf dem Smartphone gleitet es von unten ein.
+ */
+export function Modal({
+  open,
+  onClose,
+  title,
+  description,
+  children,
+  confirm,
+  cancelLabel,
+  footer,
+  size = 'md',
+  initialFocusRef,
+}: ModalProps) {
+  const { t } = useI18n();
+  const panelRef = useRef<HTMLDivElement>(null);
+  const titleId = useId();
+  const descriptionId = useId();
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
+  useDialogBehavior(open, panelRef, onClose, initialFocusRef);
 
   if (!open) return null;
 
   return createPortal(
     <div className="fixed inset-0 z-[60] flex items-end justify-center sm:items-center sm:p-6">
-      <div
-        className="animate-fade absolute inset-0 bg-[var(--backdrop)] backdrop-blur-[3px]"
-        aria-hidden="true"
-        onMouseDown={() => onCloseRef.current()}
-      />
+      <div className="animate-fade absolute inset-0 bg-[var(--backdrop)]" aria-hidden="true" onMouseDown={() => onCloseRef.current()} />
       <div
         ref={panelRef}
-        role={role}
+        role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
         aria-describedby={description ? descriptionId : undefined}
         tabIndex={-1}
-        className={`animate-sheet sm:animate-pop relative flex max-h-[92dvh] w-full flex-col overflow-hidden rounded-t-[28px] border border-line bg-surface shadow-pop outline-none sm:rounded-[26px] ${WIDTHS[size]}`}
+        className={`animate-sheet sm:animate-pop relative flex max-h-[94dvh] w-full flex-col overflow-hidden rounded-t-[16px] bg-surface shadow-pop outline-none sm:rounded-[16px] ${WIDTHS[size]}`}
       >
-        <div className="mx-auto mt-2.5 h-1.5 w-11 shrink-0 rounded-full bg-line-strong sm:hidden" aria-hidden="true" />
-        <div className="flex items-start gap-3 px-5 pb-2 pt-4 sm:px-6 sm:pt-6">
-          {icon}
-          <div className="min-w-0 flex-1">
-            <h2 id={titleId} className="font-display text-lg font-semibold tracking-[-0.01em] text-ink">
-              {title}
-            </h2>
-            {description && (
-              <div id={descriptionId} className="mt-1 text-sm text-muted">
-                {description}
-              </div>
-            )}
-          </div>
+        <div className="mx-auto mt-1.5 h-[5px] w-9 shrink-0 rounded-full bg-fill-strong sm:hidden" aria-hidden="true" />
+        <div className="grid h-[52px] shrink-0 grid-cols-[minmax(max-content,1fr)_minmax(0,auto)_minmax(max-content,1fr)] items-center gap-1 px-2 shadow-[inset_0_-0.5px_0_var(--separator)]">
           <button
             type="button"
             onClick={() => onCloseRef.current()}
-            className="-mr-2 -mt-1 grid size-10 shrink-0 place-items-center rounded-xl text-muted transition-colors hover:bg-surface-3 hover:text-ink"
-            aria-label={t.common.close}
-            title={t.common.close}
+            className="justify-self-start whitespace-nowrap rounded-full px-2 py-1.5 text-[17px] text-primary-text transition-colors hover:bg-fill active:opacity-60 sm:px-3"
           >
-            <X className="size-5" aria-hidden="true" />
+            {cancelLabel ?? t.common.cancel}
           </button>
+          <h2 id={titleId} className="truncate px-1 text-center text-[17px] font-semibold tracking-[-0.02em] text-ink">
+            {title}
+          </h2>
+          {confirm ? (
+            <button
+              type={confirm.form ? 'submit' : 'button'}
+              form={confirm.form}
+              onClick={confirm.onClick}
+              disabled={confirm.disabled}
+              className="justify-self-end whitespace-nowrap rounded-full px-2 py-1.5 text-[17px] font-semibold text-primary-text transition-colors hover:bg-fill active:opacity-60 disabled:opacity-35 sm:px-3"
+            >
+              {confirm.label}
+            </button>
+          ) : (
+            <span aria-hidden="true" />
+          )}
         </div>
-        {children && <div className="min-h-0 flex-1 overflow-y-auto px-5 pb-2 pt-3 sm:px-6">{children}</div>}
-        {footer && (
-          <div className="flex flex-col-reverse gap-2 border-t border-line px-5 py-4 pb-[calc(env(safe-area-inset-bottom,0px)+16px)] sm:flex-row sm:justify-end sm:px-6 sm:pb-4">
-            {footer}
-          </div>
-        )}
+        <div className="min-h-0 flex-1 overflow-y-auto px-5 pb-[calc(env(safe-area-inset-bottom,0px)+20px)] pt-5 sm:px-6 sm:pb-6">
+          {description && (
+            <div id={descriptionId} className="mb-5 text-[15px] text-muted">
+              {description}
+            </div>
+          )}
+          {children}
+          {footer && <div className="mt-6">{footer}</div>}
+        </div>
       </div>
     </div>,
     document.body,

@@ -8,7 +8,6 @@ import { DESCRIPTION_MAX } from '../../lib/storage';
 import { useActions, useData, useI18n, useToday } from '../../state/store';
 import type { Category, PaymentMethod, Transaction, TransactionType } from '../../types';
 import { useWarningMessage } from '../budget/warningText';
-import { Button } from '../ui/Button';
 import { Field, fieldAria } from '../ui/Field';
 import { Modal } from '../ui/Modal';
 import { useToast } from '../ui/Toast';
@@ -18,9 +17,10 @@ interface TransactionModalProps {
   transaction: Transaction | null;
   defaultType?: TransactionType;
   onClose: () => void;
+  onDelete?: (tx: Transaction) => void;
 }
 
-export function TransactionModal({ open, transaction, defaultType = 'expense', onClose }: TransactionModalProps) {
+export function TransactionModal({ open, transaction, defaultType = 'expense', onClose, onDelete }: TransactionModalProps) {
   const { t } = useI18n();
   const formId = useId();
   const editing = transaction !== null;
@@ -29,16 +29,21 @@ export function TransactionModal({ open, transaction, defaultType = 'expense', o
       open={open}
       onClose={onClose}
       title={editing ? t.form.editTitle : t.form.addTitle}
-      description={editing ? t.form.editDescription : t.form.addDescription}
+      confirm={{ label: editing ? t.form.saveShort : t.form.add, form: formId }}
       footer={
-        <>
-          <Button variant="secondary" onClick={onClose}>
-            {t.common.cancel}
-          </Button>
-          <Button type="submit" form={formId}>
-            {t.form.submit}
-          </Button>
-        </>
+        editing && onDelete ? (
+          <button
+            type="button"
+            onClick={() => {
+              const tx = transaction;
+              onClose();
+              if (tx) onDelete(tx);
+            }}
+            className="h-12 w-full rounded-[12px] bg-fill text-[17px] text-danger-ink transition-colors hover:bg-fill-strong active:opacity-70"
+          >
+            {t.form.deleteTransaction}
+          </button>
+        ) : undefined
       }
     >
       {open && <TransactionForm formId={formId} transaction={transaction} defaultType={defaultType} onDone={onClose} />}
@@ -173,17 +178,13 @@ function TransactionForm({ formId, transaction, defaultType, onDone }: FormProps
   return (
     <form id={formId} noValidate onSubmit={onSubmit} className="flex flex-col gap-5 pb-3">
       <div>
-        <p id={`${baseId}-type-label`} className="mb-1.5 text-sm font-semibold text-ink-2">
+        <p id={`${baseId}-type-label`} className="mb-1.5 pl-1 text-[13px] font-medium text-muted">
           {t.form.type}
         </p>
-        <div role="radiogroup" aria-labelledby={`${baseId}-type-label`} className="grid grid-cols-2 gap-2.5">
+        <div role="radiogroup" aria-labelledby={`${baseId}-type-label`} className="grid grid-cols-2 gap-[2px] rounded-[10px] bg-fill p-[2px]">
           {typeOptions.map((option, index) => {
             const selected = option.value === type;
             const Icon = option.icon;
-            const tone =
-              option.value === 'income'
-                ? 'border-income bg-income-soft text-income-ink'
-                : 'border-expense bg-expense-soft text-expense-ink';
             return (
               <button
                 key={option.value}
@@ -196,17 +197,13 @@ function TransactionForm({ formId, transaction, defaultType, onDone }: FormProps
                 tabIndex={selected ? 0 : -1}
                 onClick={() => changeType(option.value)}
                 onKeyDown={onTypeKeyDown}
-                className={`flex h-14 items-center justify-center gap-2 rounded-2xl border-2 text-[15px] font-semibold transition-all duration-150 ${
-                  selected ? tone : 'border-line bg-surface text-muted hover:border-line-strong hover:text-ink'
+                className={`flex h-9 items-center justify-center gap-1.5 rounded-[8px] text-[14px] font-semibold transition-[background-color,color,box-shadow] duration-200 ${
+                  selected
+                    ? `bg-seg-thumb shadow-thumb ${option.value === 'income' ? 'text-income-ink' : 'text-expense-ink'}`
+                    : 'text-ink-2 hover:text-ink'
                 }`}
               >
-                <span
-                  className={`grid size-7 place-items-center rounded-full ${
-                    selected ? 'bg-surface/70' : 'bg-surface-3'
-                  }`}
-                >
-                  <Icon className="size-4" aria-hidden="true" strokeWidth={2.5} />
-                </span>
+                <Icon className="size-4" aria-hidden="true" strokeWidth={2.5} />
                 {option.label}
               </button>
             );
@@ -215,8 +212,8 @@ function TransactionForm({ formId, transaction, defaultType, onDone }: FormProps
       </div>
 
       <Field id={ids.amount} label={t.form.amount} error={visibleErrors.amount}>
-        <div className="control flex h-14 items-center gap-2 px-4">
-          <span className="text-lg font-semibold text-muted" aria-hidden="true">
+        <div className="control flex h-16 items-center gap-2 px-4">
+          <span className="text-[22px] font-semibold text-muted" aria-hidden="true">
             {f.currencySymbol}
           </span>
           <input
@@ -229,7 +226,7 @@ function TransactionForm({ formId, transaction, defaultType, onDone }: FormProps
             placeholder={t.form.amountPlaceholder}
             value={amount}
             onChange={(event) => setAmount(event.target.value.slice(0, 20))}
-            className="num h-full w-full min-w-0 bg-transparent font-display text-xl font-semibold text-ink outline-none placeholder:text-line-strong"
+            className="num h-full w-full min-w-0 bg-transparent font-display text-[28px] font-semibold tracking-[-0.02em] text-ink outline-none placeholder:text-muted/40"
           />
         </div>
       </Field>
@@ -300,7 +297,7 @@ function TransactionForm({ formId, transaction, defaultType, onDone }: FormProps
       </Field>
 
       {submitted && Object.keys(errors).length > 0 && (
-        <p role="alert" className="rounded-xl bg-danger-soft px-4 py-3 text-sm font-medium text-danger-ink">
+        <p role="alert" className="rounded-[12px] bg-danger-soft px-4 py-3 text-[14px] font-medium text-danger-ink">
           {t.form.errors.summary}
         </p>
       )}
